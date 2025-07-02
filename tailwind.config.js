@@ -1,0 +1,58 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#FFF9F5',
+          100: '#FFEDE0',
+          200: '#FFD4B8',
+          300: '#FFB27E',
+          400: '#FF9045',
+          500: '#FF6D0C',
+          600: '#D25400',
+          700: '#993D00',
+          800: '#602600',
+          900: '#271000',
+          950: '#0A0400',
+        },
+        secondary: {
+          50: '#FDF5FE',
+          100: '#FAE2FD',
+          200: '#F4BCFB',
+          300: '#EC86F8',
+          400: '#E450F4',
+          500: '#DB1AF1',
+          600: '#B30CC6',
+          700: '#820990',
+          800: '#52065A',
+          900: '#210225',
+          950: '#09010A',
+        },
+        neutral: {
+          50: '#FAFAFA',
+          100: '#F0F0F0',
+          200: '#DBDBDB',
+          300: '#BFBFBF',
+          400: '#A2A2A2',
+          500: '#868686',
+          600: '#696969',
+          700: '#4D4D4D',
+          800: '#303030',
+          900: '#131313',
+          950: '#050505',
+        },
+      },
+      fontFamily: {
+        display: ['var(--font-display)'],
+        ui: ['var(--font-ui)'],
+      },
+    },
+  },
+  plugins: [],
+} 

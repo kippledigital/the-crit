@@ -1,7 +1,55 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import type { FormData as FormDataType, ApiResponse } from '@/types/form'
+import SuccessModal from '@/components/SuccessModal'
+import { loadAnimationData } from '@/lib/lottie-animations'
+import { ANIMATION_CONFIG, SUCCESS_MODAL_CONFIG } from '@/lib/animation-config'
+import { AnimatePresence, motion } from 'framer-motion'
+import Tooltip from '@/components/Tooltip'
+
+function getFileType(file: File) {
+  if (file.type.startsWith('image/')) return 'image'
+  if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) return 'pdf'
+  return 'other'
+}
+
+function FilePreview({ file }: { file: File }) {
+  const type = getFileType(file)
+  const url = useMemo(() => type === 'image' ? URL.createObjectURL(file) : null, [file, type])
+  const [imgError, setImgError] = useState(false)
+  useEffect(() => { return () => { if (url) URL.revokeObjectURL(url) } }, [url])
+
+  // Consistent SVG icons
+  const DocumentIcon = (
+    <span className="w-8 h-8 flex items-center justify-center bg-neutral-100 text-neutral-400 rounded mr-2 border border-neutral-200">
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <path d="M8 8h8M8 12h8M8 16h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    </span>
+  )
+  const ImageIcon = (
+    <span className="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-400 rounded mr-2 border border-neutral-200">
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M4 18l5-5a2 2 0 0 1 2.8 0l4.2 4.2a2 2 0 0 0 2.8 0L20 16" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+    </span>
+  )
+
+  if (type === 'image' && url && !imgError) {
+    return <img src={url} alt={file.name} className="w-8 h-8 object-cover rounded mr-2 border border-neutral-200" onError={() => setImgError(true)} />
+  }
+  if (type === 'image') {
+    return ImageIcon
+  }
+  if (type === 'pdf') {
+    return DocumentIcon
+  }
+  return DocumentIcon
+}
 
 export default function Home() {
   const [formData, setFormData] = useState<FormDataType>({
@@ -13,10 +61,52 @@ export default function Home() {
     files: []
   })
   
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [submitMessage, setSubmitMessage] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [isModalLoading, setIsModalLoading] = useState(false)
+  const [loadingAnimation, setLoadingAnimation] = useState<any>(null)
+  const [successAnimation, setSuccessAnimation] = useState<any>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
+  const [isDragActive, setIsDragActive] = useState(false)
+
+  // File validation constants
+  const MAX_FILES = 5
+  const MAX_SIZE_MB = 10
+  const ALLOWED_TYPES = [
+    'image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'application/pdf', 'application/octet-stream'
+  ]
+
+  // Load Lottie animations on component mount
+  useEffect(() => {
+    const loadAnimations = async () => {
+      const [loadingData, successData] = await Promise.all([
+        loadAnimationData(ANIMATION_CONFIG.LOADING),
+        loadAnimationData(ANIMATION_CONFIG.SUCCESS)
+      ])
+      setLoadingAnimation(loadingData)
+      setSuccessAnimation(successData)
+    }
+    
+    loadAnimations()
+  }, [])
+
+  const resetForm = () => {
+    setFormData({
+      designerName: '',
+      email: '',
+      projectTitle: '',
+      projectDescription: '',
+      designLinks: '',
+      files: []
+    })
+    setSubmitStatus('idle')
+    setSubmitMessage('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -28,23 +118,59 @@ export default function Home() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    setFormData(prev => ({
-      ...prev,
-      files: [...prev.files, ...files]
-    }))
+    addFiles(files)
   }
 
   const handleFileDrop = (e: React.DragEvent) => {
     e.preventDefault()
     const files = Array.from(e.dataTransfer.files)
-    setFormData(prev => ({
-      ...prev,
-      files: [...prev.files, ...files]
-    }))
+    addFiles(files)
+  }
+
+  function addFiles(newFiles: File[]) {
+    setFileError(null)
+    let currentFiles = [...formData.files]
+    for (const file of newFiles) {
+      if (currentFiles.length >= MAX_FILES) {
+        setFileError(`You can upload up to ${MAX_FILES} files.`)
+        break
+      }
+      if (!ALLOWED_TYPES.includes(file.type) && !file.name.endsWith('.fig')) {
+        setFileError('Unsupported file type.')
+        continue
+      }
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        setFileError(`Each file must be under ${MAX_SIZE_MB}MB.`)
+        continue
+      }
+      if (currentFiles.some(f => f.name === file.name && f.size === file.size)) {
+        setFileError('Duplicate file detected.')
+        continue
+      }
+      currentFiles.push(file)
+    }
+    setFormData(prev => ({ ...prev, files: currentFiles }))
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
+    setIsDragActive(true)
+  }
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragActive(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragActive(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    setIsDragActive(false)
+    handleFileDrop(e)
   }
 
   const removeFile = (index: number) => {
@@ -70,7 +196,8 @@ export default function Home() {
       return
     }
 
-    setIsSubmitting(true)
+    setShowModal(true)
+    setIsModalLoading(true)
     setSubmitStatus('idle')
 
     try {
@@ -98,15 +225,8 @@ export default function Home() {
       if (result.success) {
         setSubmitStatus('success')
         setSubmitMessage(result.message)
-        // Reset form on success
-        setFormData({
-          designerName: '',
-          email: '',
-          projectTitle: '',
-          projectDescription: '',
-          designLinks: '',
-          files: []
-        })
+        // Switch to success state
+        setIsModalLoading(false)
       } else {
         setSubmitStatus('error')
         setSubmitMessage(result.error || 'Something went wrong')
@@ -116,70 +236,108 @@ export default function Home() {
       setSubmitStatus('error')
       setSubmitMessage('Failed to submit. Please try again.')
     } finally {
-      setIsSubmitting(false)
+      // Keep modal open if there was an error, but stop loading
+      if (submitStatus === 'error') {
+        setIsModalLoading(false)
+      }
     }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-4rem)]">
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           
-          {/* Left Column - Content */}
+          {/* Left Column - Hero Content */}
           <div className="space-y-8">
             <div className="space-y-6">
-              <h1 className="font-display text-5xl lg:text-6xl font-bold text-neutral-900 leading-tight">
-                Get Instant
-                <span className="text-primary-500 block">Design Feedback</span>
-              </h1>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-center space-x-2 text-primary-600 font-ui text-sm"
+              >
+                <span className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
+                <span>AI-Powered Design Feedback</span>
+              </motion.div>
               
-              <p className="font-ui text-xl text-neutral-600 leading-relaxed">
-                Upload your designs and receive intelligent, actionable feedback powered by AI. 
-                Transform your creative process with instant critiques.
-              </p>
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="font-display text-5xl lg:text-6xl font-bold text-neutral-900 leading-tight"
+              >
+                Transform Your Designs
+                <span className="text-primary-500 block">From Good to Great</span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="font-ui text-xl text-neutral-600 leading-relaxed"
+              >
+                Get instant, intelligent feedback on your designs. Upload your work and receive 
+                actionable critiques that help you improve your craft and land better clients.
+              </motion.p>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-start space-x-4">
-                <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+            {/* Social Proof */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex items-center space-x-4 text-sm text-neutral-500"
+            >
+              <div className="flex items-center space-x-2">
+                <div className="flex -space-x-2">
+                  {[1,2,3,4,5,6].map((i) => (
+                    <div key={i} className="relative">
+                      <div className="w-8 h-8 bg-neutral-300 rounded-full border-2 border-white flex items-center justify-center overflow-hidden">
+                        {i === 6 ? (
+                          <span className="text-xs font-ui font-medium text-neutral-600">5+</span>
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full"></div>
+                        )}
+                      </div>
+                      {i === 6 && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse border-2 border-white"></div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <h3 className="font-ui font-semibold text-neutral-900">Instant Analysis</h3>
-                  <p className="font-ui text-neutral-600">Get detailed feedback in seconds, not hours</p>
-                </div>
+                <span>Join 2,500+ designers improving their craft</span>
               </div>
+            </motion.div>
 
-              <div className="flex items-start space-x-4">
-                <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-ui font-semibold text-neutral-900">Actionable Insights</h3>
-                  <p className="font-ui text-neutral-600">Specific recommendations to improve your designs</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-ui font-semibold text-neutral-900">Learn & Grow</h3>
-                  <p className="font-ui text-neutral-600">Understand design principles and best practices</p>
-                </div>
-              </div>
-            </div>
+            {/* CTA Buttons */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <button 
+                onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-primary-500 hover:bg-primary-600 text-white font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+              >
+                Get Free Feedback
+              </button>
+              <button className="border border-neutral-300 hover:border-primary-500 text-neutral-700 hover:text-primary-600 font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200">
+                See Sample Critique
+              </button>
+            </motion.div>
           </div>
 
           {/* Right Column - Upload Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-neutral-200">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            id="upload-section"
+            className="bg-white rounded-2xl shadow-xl p-8 border border-neutral-200"
+          >
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">
@@ -191,12 +349,6 @@ export default function Home() {
               </div>
 
               {/* Status Messages */}
-              {submitStatus === 'success' && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="font-ui text-green-800">{submitMessage}</p>
-                </div>
-              )}
-
               {submitStatus === 'error' && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <p className="font-ui text-red-800">{submitMessage}</p>
@@ -218,7 +370,15 @@ export default function Home() {
                   </label>
 
                   <label className="block">
-                    <span className="font-ui font-medium text-neutral-700">Email *</span>
+                    <span className="font-ui font-medium text-neutral-700 flex items-center gap-1">
+                      Email *
+                      <Tooltip content="We'll only use your email to send your critique. It won't be shared.">
+                        <svg className="w-4 h-4 text-orange-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Email info">
+                          <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" />
+                        </svg>
+                      </Tooltip>
+                    </span>
                     <input
                       type="email"
                       name="email"
@@ -231,6 +391,7 @@ export default function Home() {
 
                   <label className="block">
                     <span className="font-ui font-medium text-neutral-700">Project Title *</span>
+                    <span className="text-xs text-neutral-400 float-right mt-1">100/100</span>
                     <input
                       type="text"
                       name="projectTitle"
@@ -242,7 +403,16 @@ export default function Home() {
                   </label>
 
                   <label className="block">
-                    <span className="font-ui font-medium text-neutral-700">Project Description *</span>
+                    <span className="font-ui font-medium text-neutral-700 flex items-center gap-1">
+                      Project Description *
+                      <Tooltip content="Describe your project and what kind of feedback you want.">
+                        <svg className="w-4 h-4 text-orange-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Description info">
+                          <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" />
+                        </svg>
+                      </Tooltip>
+                    </span>
+                    <span className="text-xs text-neutral-400 float-right mt-1">300/300</span>
                     <textarea
                       name="projectDescription"
                       value={formData.projectDescription}
@@ -275,16 +445,30 @@ export default function Home() {
                   </div>
 
                   <div
-                    onDrop={handleFileDrop}
+                    onDrop={handleDrop}
                     onDragOver={handleDragOver}
-                    className="w-full px-4 py-6 border-2 border-dashed border-neutral-300 rounded-lg font-ui text-neutral-600 hover:border-primary-400 hover:text-primary-600 transition-colors cursor-pointer"
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    className={`w-full px-4 py-6 border-2 border-dashed rounded-lg font-ui text-neutral-600 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-400
+                      ${isDragActive ? 'border-primary-400 shadow-[0_0_0_4px_rgba(255,115,0,0.15)] bg-primary-50/30 text-primary-600' : 'border-neutral-300 hover:border-primary-400 hover:text-primary-600'}`}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="File upload dropzone. Drag and drop files here, or click to browse."
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <motion.svg
+                        className="w-8 h-8"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-label="Upload files"
+                        animate={isDragActive ? { y: [0, -6, 0], color: '#ff7300' } : { y: 0, color: '#737373' }}
+                        transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0, repeatType: 'loop' }}
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                      <span className="font-ui font-medium">Drop files here or click to upload</span>
+                      </motion.svg>
+                      <span className="font-ui font-medium">Drag & drop files here, or click to browse</span>
                       <span className="text-sm">Images, PDFs, Figma exports (max 5 files, 10MB each)</span>
                     </div>
                   </div>
@@ -302,36 +486,264 @@ export default function Home() {
                   {formData.files.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="font-ui font-medium text-neutral-700">Selected Files:</h4>
-                      {formData.files.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-neutral-50 rounded">
-                          <span className="font-ui text-sm text-neutral-600">{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeFile(index)}
-                            className="text-red-500 hover:text-red-700"
+                      <AnimatePresence initial={false}>
+                        {formData.files.map((file, index) => (
+                          <motion.div
+                            key={file.name + file.size}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: 40, scale: 0.95 }}
+                            transition={{ duration: 0.25 }}
+                            className="flex items-center justify-between p-2 bg-neutral-50 rounded shadow-sm"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
+                            <div className="flex items-center min-w-0 flex-1">
+                              <motion.div
+                                initial={{ opacity: 0, x: -16 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -16 }}
+                                transition={{ duration: 0.25 }}
+                              >
+                                <FilePreview file={file} />
+                              </motion.div>
+                              <span className="font-ui text-sm text-neutral-600 truncate" title={file.name}>{file.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              aria-label={`Remove file ${file.name}`}
+                              tabIndex={0}
+                              onClick={() => removeFile(index)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') removeFile(index)
+                              }}
+                              className="text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 rounded"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
                     </div>
+                  )}
+                  {fileError && (
+                    <div className="text-red-500 text-sm mt-1">{fileError}</div>
                   )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isModalLoading}
                   className="w-full bg-primary-500 hover:bg-primary-600 text-white font-ui font-medium px-6 py-3 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit for Analysis'}
+                  {isModalLoading ? 'Submitting...' : 'Submit for Analysis'}
                 </button>
               </form>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Trust Indicators Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center space-y-8">
+            <h2 className="font-display text-3xl font-bold text-neutral-900">
+              Trusted by Designers Worldwide
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary-500 mb-2">2,500+</div>
+                <div className="text-neutral-600">Designers Improved</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary-500 mb-2">15,000+</div>
+                <div className="text-neutral-600">Designs Critiqued</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary-500 mb-2">4.9/5</div>
+                <div className="text-neutral-600">Average Rating</div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl font-bold text-neutral-900 mb-4">
+              Why Designers Choose The Crit
+            </h2>
+            <p className="font-ui text-xl text-neutral-600 max-w-2xl mx-auto">
+              Get the feedback you need to improve your designs and advance your career
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Instant Feedback</h3>
+              <p className="font-ui text-neutral-600">Get detailed critiques in seconds, not hours or days. No more waiting for feedback.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Educational Insights</h3>
+              <p className="font-ui text-neutral-600">Learn why changes work, not just what to change. Understand design principles.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                </svg>
+              </div>
+              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Multi-Discipline Analysis</h3>
+              <p className="font-ui text-neutral-600">Get feedback on visual design, UX, accessibility, and more from specialized AI agents.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Supportive Feedback</h3>
+              <p className="font-ui text-neutral-600">Encouraging, constructive critiques that help you grow, not tear you down.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Free to Start</h3>
+              <p className="font-ui text-neutral-600">Try our service completely free. No credit card required, no strings attached.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Secure & Private</h3>
+              <p className="font-ui text-neutral-600">Your designs are processed securely and never shared. Your privacy is protected.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl font-bold text-neutral-900 mb-4">
+              What Designers Are Saying
+            </h2>
+            <p className="font-ui text-xl text-neutral-600">
+              Real feedback from real designers who improved their craft
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-neutral-50 p-6 rounded-xl">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                  <span className="font-ui font-semibold text-primary-600">S</span>
+                </div>
+                <div>
+                  <div className="font-ui font-semibold text-neutral-900">Sarah Chen</div>
+                  <div className="font-ui text-sm text-neutral-600">UI/UX Designer</div>
+                </div>
+              </div>
+              <p className="font-ui text-neutral-700 italic">
+                "The Crit helped me identify issues in my portfolio that I never noticed. I landed my dream job within 2 months!"
+              </p>
+            </div>
+
+            <div className="bg-neutral-50 p-6 rounded-xl">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                  <span className="font-ui font-semibold text-primary-600">M</span>
+                </div>
+                <div>
+                  <div className="font-ui font-semibold text-neutral-900">Marcus Rodriguez</div>
+                  <div className="font-ui text-sm text-neutral-600">Freelance Designer</div>
+                </div>
+              </div>
+              <p className="font-ui text-neutral-700 italic">
+                "Instant feedback on my client work has been a game-changer. My clients are happier and I'm charging more."
+              </p>
+            </div>
+
+            <div className="bg-neutral-50 p-6 rounded-xl">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                  <span className="font-ui font-semibold text-primary-600">A</span>
+                </div>
+                <div>
+                  <div className="font-ui font-semibold text-neutral-900">Alex Thompson</div>
+                  <div className="font-ui text-sm text-neutral-600">Student Designer</div>
+                </div>
+              </div>
+              <p className="font-ui text-neutral-700 italic">
+                "As a student, I can't afford expensive mentors. The Crit gives me professional-level feedback for free."
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <div className="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl p-12 text-white">
+            <h2 className="font-display text-3xl font-bold mb-4">
+              Ready to Transform Your Designs?
+            </h2>
+            <p className="font-ui text-xl mb-8 opacity-90">
+              Join thousands of designers who are improving their craft with AI-powered feedback
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-white text-primary-600 hover:bg-neutral-100 font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200"
+              >
+                Get Free Feedback Now
+              </button>
+              <button className="border border-white text-white hover:bg-white hover:text-primary-600 font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200">
+                See How It Works
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Unified Modal */}
+      <SuccessModal
+        isVisible={showModal}
+        isLoading={isModalLoading}
+        onClose={() => setShowModal(false)}
+        onResetForm={resetForm}
+        loadingAnimation={loadingAnimation}
+        successAnimation={successAnimation}
+        title={SUCCESS_MODAL_CONFIG.title}
+        message={SUCCESS_MODAL_CONFIG.message}
+        loadingTitle="Processing..."
+        loadingMessage={SUCCESS_MODAL_CONFIG.loadingMessage}
+      />
     </div>
   )
 } 

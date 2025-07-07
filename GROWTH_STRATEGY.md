@@ -16,7 +16,7 @@ The Crit is an AI-powered design feedback platform that provides instant, intell
 #### 1. Student Designers (High Priority)
 - **Pain Points**: Limited access to quality feedback, portfolio development needs
 - **Search Intent**: "design feedback", "portfolio review", "design critique"
-- **Channels**: Design schools, bootcamps, YouTube tutorials
+- **Channels**: Design schools, bootcamps, YouTube tutorials, Reddit
 
 #### 2. Junior/Freelance Designers (High Priority)
 - **Pain Points**: Solo work isolation, need for external validation

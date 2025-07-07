@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import type { FormData as FormDataType, ApiResponse } from '@/types/form'
 import SuccessModal from '@/components/SuccessModal'
+import SampleCritiqueModal from '@/components/SampleCritiqueModal'
 import { loadAnimationData } from '@/lib/lottie-animations'
 import { ANIMATION_CONFIG, SUCCESS_MODAL_CONFIG } from '@/lib/animation-config'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useInView } from 'framer-motion'
 import Tooltip from '@/components/Tooltip'
+import { Users, FileText, Star, Zap, GraduationCap, BarChart3, Heart, Gift, Lock } from 'lucide-react'
+
 
 function getFileType(file: File) {
   if (file.type.startsWith('image/')) return 'image'
@@ -20,7 +23,7 @@ function FilePreview({ file }: { file: File }) {
   const [imgError, setImgError] = useState(false)
   useEffect(() => { return () => { if (url) URL.revokeObjectURL(url) } }, [url])
 
-  // Consistent SVG icons
+  // Consistent SVG icons (reverted to original design)
   const DocumentIcon = (
     <span className="w-8 h-8 flex items-center justify-center bg-neutral-100 text-neutral-400 rounded mr-2 border border-neutral-200">
       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
@@ -51,6 +54,563 @@ function FilePreview({ file }: { file: File }) {
   return DocumentIcon
 }
 
+// Enhanced Count-up animation component with reduced motion support
+function CountUp({ end, duration = 2.5, isVisible }: { end: number; duration?: number; isVisible: boolean }) {
+  const [count, setCount] = useState(0)
+  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  
+  useEffect(() => {
+    if (!isVisible) return
+    
+    if (prefersReducedMotion) {
+      setCount(end)
+      return
+    }
+    
+    let startTime: number
+    let animationFrame: number
+    
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime
+      const progress = Math.min((currentTime - startTime) / (duration * 1000), 1)
+      
+      // Use easeOutQuart for smoother animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+      setCount(Math.floor(easeOutQuart * end))
+      
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate)
+      }
+    }
+    
+    animationFrame = requestAnimationFrame(animate)
+    
+    return () => {
+      if (animationFrame) cancelAnimationFrame(animationFrame)
+    }
+  }, [end, duration, isVisible, prefersReducedMotion])
+  
+  return <span>{count.toLocaleString()}</span>
+}
+
+// Polished Trust Section Component with consistent design system
+function TrustSection() {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: "-80px" })
+  
+  const stats = [
+    {
+      id: 1,
+      number: 2847,
+      label: "Designers Helped",
+      bgColor: "bg-info-500",
+      hoverColor: "group-hover:bg-info-400",
+      icon: <Users className="w-7 h-7 text-white" />
+    },
+    {
+      id: 2,
+      number: 15234,
+      label: "Designs Improved",
+      bgColor: "bg-success-500",
+      hoverColor: "group-hover:bg-success-400",
+      icon: <FileText className="w-7 h-7 text-white" />
+    },
+    {
+      id: 3,
+      number: 4.8,
+      label: "Helpfulness Rating",
+      suffix: "/5",
+      bgColor: "bg-primary-500",
+      hoverColor: "group-hover:bg-primary-400",
+      icon: <Star className="w-7 h-7 text-white" />
+    }
+  ]
+  
+  return (
+    <section className="relative py-24 overflow-hidden bg-gradient-to-br from-neutral-50 to-primary-50/20" ref={ref}>
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ea580c' fill-opacity='0.04'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
+      </div>
+      
+      <div className="relative container mx-auto px-4">
+        <div className="text-center space-y-12">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="inline-block px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-primary-200 mb-6 shadow-sm"
+            >
+              <span className="text-primary-600 font-ui font-medium text-sm">✨ Proven Results</span>
+            </motion.div>
+            
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-4 leading-tight">
+              Trusted by Designers{" "}
+              <span className="text-secondary-500">
+                Worldwide
+              </span>
+            </h2>
+            <p className="font-ui text-lg md:text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of designers who have transformed their work with AI-powered feedback
+            </p>
+          </motion.div>
+          
+          {/* Stats Grid */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.id}
+                initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.95 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: index * 0.2,
+                  ease: "easeOut"
+                }}
+                className="group"
+              >
+                <motion.div 
+                  className="bg-white rounded-2xl p-8 border border-neutral-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                  whileHover={{ 
+                    y: -4,
+                    scale: 1.02
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <div className="flex flex-col items-center space-y-6">
+                    {/* Diversified brand color icon containers */}
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+                      transition={{ 
+                        duration: 0.5, 
+                        delay: index * 0.2 + 0.3,
+                        type: "spring",
+                        bounce: 0.3
+                      }}
+                      className={`w-14 h-14 rounded-xl ${stat.bgColor} ${stat.hoverColor} flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300`}
+                    >
+                      {stat.icon}
+                    </motion.div>
+                    
+                    {/* Number with count-up animation */}
+                    <div className="text-center space-y-2">
+                      <motion.div 
+                        className="text-4xl md:text-5xl font-bold text-neutral-900 font-display"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {stat.number === 4.8 ? (
+                          <span>{stat.number}{stat.suffix}</span>
+                        ) : (
+                          <span>
+                            <CountUp end={stat.number} isVisible={isInView} duration={2.5} />
+                          </span>
+                        )}
+                      </motion.div>
+                      <div className="text-neutral-600 font-ui font-medium text-base">
+                        {stat.label}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Polished Features Section Component with consistent design system
+function FeaturesSection() {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: "-80px" })
+  
+  const features = [
+    {
+      id: 1,
+      title: "60-Second Critiques",
+      description: "Get professional-level feedback faster than waiting for a colleague's response. No more delays in your creative process.",
+      badge: "⚡ Lightning Fast",
+      bgColor: "bg-primary-500",
+      hoverColor: "group-hover:bg-primary-400",
+      icon: <Zap className="w-6 h-6 text-white" />
+    },
+    {
+      id: 2,
+      title: "Learn Design Principles",
+      description: "Understand typography, color theory, and UX principles through real examples from your own work.",
+      badge: "📚 Educational",
+      bgColor: "bg-info-500",
+      hoverColor: "group-hover:bg-info-400",
+      icon: <GraduationCap className="w-6 h-6 text-white" />
+    },
+    {
+      id: 3,
+      title: "Complete Design Analysis",
+      description: "AI agents analyze layout, accessibility, brand consistency, and user experience in one comprehensive review.",
+      badge: "🎯 Comprehensive",
+      bgColor: "bg-success-500",
+      hoverColor: "group-hover:bg-success-400",
+      icon: <BarChart3 className="w-6 h-6 text-white" />
+    },
+    {
+      id: 4,
+      title: "Encouraging Mentorship",
+      description: "Supportive, constructive feedback that builds confidence and skills, not criticism that discourages.",
+      badge: "💝 Supportive",
+      bgColor: "bg-secondary-400",
+      hoverColor: "group-hover:bg-secondary-300",
+      icon: <Heart className="w-6 h-6 text-white" />
+    },
+    {
+      id: 5,
+      title: "Try It Free",
+      description: "Start immediately with no payment required. Experience professional-quality critiques before making any commitment.",
+      badge: "🆓 No Cost",
+      bgColor: "bg-success-600",
+      hoverColor: "group-hover:bg-success-500",
+      icon: <Gift className="w-6 h-6 text-white" />
+    },
+    {
+      id: 6,
+      title: "Private & Secure",
+      description: "Your designs are processed with enterprise-grade security and never stored or shared. Complete confidentiality guaranteed.",
+      badge: "🔒 Secure",
+      bgColor: "bg-info-600",
+      hoverColor: "group-hover:bg-info-500",
+      icon: <Lock className="w-6 h-6 text-white" />
+    }
+  ]
+  
+  return (
+    <section className="py-24 bg-neutral-50" ref={ref}>
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <motion.div 
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="inline-block px-4 py-2 bg-primary-50 rounded-full border border-primary-200 mb-6 shadow-sm"
+          >
+            <span className="text-primary-600 font-ui font-medium text-sm">🎨 Why Choose Us</span>
+          </motion.div>
+          
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-4 leading-tight">
+            Why Designers Choose{" "}
+            <span className="text-secondary-500">
+              The Crit
+            </span>
+          </h2>
+          <p className="font-ui text-lg md:text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
+            Professional feedback that accelerates your growth and elevates your design career
+          </p>
+        </motion.div>
+        
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.id}
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.95 }}
+              transition={{ 
+                duration: 0.6, 
+                delay: index * 0.1,
+                ease: "easeOut"
+              }}
+              className="group h-full"
+            >
+              <motion.div 
+                className="relative bg-white rounded-2xl p-6 border border-neutral-200 shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                whileHover={{ 
+                  y: -4,
+                  scale: 1.02
+                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                {/* Badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
+                  className="absolute -top-3 left-4 px-3 py-1 bg-white rounded-full border border-neutral-200 text-xs font-ui font-medium text-neutral-600 shadow-sm"
+                >
+                  {feature.badge}
+                </motion.div>
+                
+                <div className="pt-4 flex flex-col h-full">
+                  {/* Diversified brand color icon containers */}
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+                    transition={{ 
+                      duration: 0.5, 
+                      delay: index * 0.1 + 0.3,
+                      type: "spring",
+                      bounce: 0.3
+                    }}
+                    className={`w-14 h-14 rounded-xl ${feature.bgColor} ${feature.hoverColor} flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-all duration-300`}
+                  >
+                    {feature.icon}
+                  </motion.div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 space-y-4">
+                    <motion.h3 
+                      className="font-ui font-bold text-xl text-neutral-900 group-hover:text-primary-600 transition-colors duration-300 leading-tight"
+                      whileHover={{ x: 2 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {feature.title}
+                    </motion.h3>
+                    
+                    <p className="font-ui text-neutral-600 leading-relaxed text-base">
+                      {feature.description}
+                    </p>
+                    
+                    {/* Subtle arrow indicator */}
+                    <motion.div 
+                      className="flex items-center text-primary-500 opacity-0 group-hover:opacity-100 transition-all duration-300 pt-2"
+                      initial={{ x: -10 }}
+                      whileHover={{ x: 0 }}
+                    >
+                      <span className="text-sm font-ui font-medium mr-2">Learn more</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Polished Testimonials Section Component
+function TestimonialsSection() {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: "-80px" })
+  
+  const testimonials = [
+    {
+      id: 1,
+      name: "Sarah Chen",
+      role: "UI/UX Designer",
+      company: "Spotify",
+      avatar: "S",
+      quote: "The Crit helped me identify issues in my portfolio that I never noticed. I landed my dream job within 2 months!",
+      rating: 5
+    },
+    {
+      id: 2,
+      name: "Marcus Rodriguez",
+      role: "Freelance Designer",
+      company: "Independent",
+      avatar: "M",
+      quote: "Instant feedback on my client work has been a game-changer. My clients are happier and I'm charging more.",
+      rating: 5
+    },
+    {
+      id: 3,
+      name: "Alex Thompson",
+      role: "Student Designer",
+      company: "Design School",
+      avatar: "A",
+      quote: "As a student, I can't afford expensive mentors. The Crit gives me professional-level feedback for free.",
+      rating: 5
+    }
+  ]
+  
+  return (
+    <section className="py-20 bg-gradient-to-br from-neutral-50 to-primary-50/10" ref={ref}>
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="inline-block px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-primary-200 mb-6 shadow-sm"
+          >
+            <span className="text-primary-600 font-ui font-medium text-sm">💬 Testimonials</span>
+          </motion.div>
+          
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-4 leading-tight">
+            What Designers Are{" "}
+            <span className="text-secondary-500">
+              Saying
+            </span>
+          </h2>
+          <p className="font-ui text-lg md:text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed">
+            Real feedback from real designers who improved their craft
+          </p>
+        </motion.div>
+        
+        {/* Testimonials Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <motion.div
+              key={testimonial.id}
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.95 }}
+              transition={{ 
+                duration: 0.6, 
+                delay: index * 0.15,
+                ease: "easeOut"
+              }}
+              className="group"
+            >
+              <motion.div 
+                className={`bg-white rounded-2xl p-6 border-2 shadow-lg hover:shadow-xl transition-all duration-300 h-full ${
+                  index === 0 ? 'border-primary-200 hover:border-primary-400' :
+                  index === 1 ? 'border-secondary-200 hover:border-secondary-400' :
+                  'border-primary-300 hover:border-primary-500'
+                }`}
+                whileHover={{ 
+                  y: -4,
+                  scale: 1.02
+                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                {/* Quote */}
+                <div className="mb-6">
+                  <div className="flex mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="font-ui text-neutral-700 leading-relaxed italic text-base">
+                    "{testimonial.quote}"
+                  </p>
+                </div>
+                
+                {/* Author */}
+                <div className="flex items-center">
+                  {/* Diversified brand color avatar containers */}
+                  <motion.div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-ui font-semibold mr-4 shadow-lg ${
+                      index === 0 ? 'bg-primary-500 group-hover:bg-primary-400' :
+                      index === 1 ? 'bg-secondary-500 group-hover:bg-secondary-400' :
+                      'bg-primary-600 group-hover:bg-primary-500'
+                    }`}
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {testimonial.avatar}
+                  </motion.div>
+                  <div>
+                    <div className="font-ui font-semibold text-neutral-900 text-base">
+                      {testimonial.name}
+                    </div>
+                    <div className="font-ui text-sm text-neutral-600">
+                      {testimonial.role} • {testimonial.company}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Enhanced CTA Section Component
+function CTASection() {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: "-80px" })
+  
+  return (
+    <section className="py-20" ref={ref}>
+      <div className="container mx-auto px-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.95 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-500 rounded-3xl p-12 md:p-16 text-white overflow-hidden shadow-2xl"
+        >
+          {/* Background pattern overlay */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}></div>
+          </div>
+          
+          <div className="relative text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                Ready to Transform Your{" "}
+                <span className="text-white/90">Designs?</span>
+              </h2>
+              <p className="font-ui text-lg md:text-xl mb-10 opacity-90 max-w-3xl mx-auto leading-relaxed">
+                Join thousands of designers who are improving their craft with AI-powered feedback
+              </p>
+            </motion.div>
+            
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <motion.button 
+                onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-white text-primary-600 hover:bg-neutral-50 font-ui font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                Get Free Feedback Now
+              </motion.button>
+              <motion.button 
+                className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-ui font-semibold px-8 py-4 rounded-xl transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                See How It Works
+              </motion.button>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
 export default function Home() {
   const [formData, setFormData] = useState<FormDataType>({
     designerName: '',
@@ -65,6 +625,7 @@ export default function Home() {
   const [submitMessage, setSubmitMessage] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [isModalLoading, setIsModalLoading] = useState(false)
+  const [showSampleCritique, setShowSampleCritique] = useState(false)
   const [loadingAnimation, setLoadingAnimation] = useState<any>(null)
   const [successAnimation, setSuccessAnimation] = useState<any>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -268,8 +829,20 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="font-display text-5xl lg:text-6xl font-bold text-neutral-900 leading-tight"
               >
-                Transform Your Designs
-                <span className="text-primary-500 block">From Good to Great</span>
+                Design Feedback That{' '}
+                <span className="relative inline-block">
+                  Actually
+                  <motion.img 
+                    src="/underline.svg" 
+                    alt="" 
+                    className="absolute -bottom-2 left-0 w-full h-auto"
+                    style={{ zIndex: -1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                  />
+                </span>
+                <span className="text-primary-500 block">Improves Your Work</span>
               </motion.h1>
               
               <motion.p 
@@ -278,8 +851,8 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="font-ui text-xl text-neutral-600 leading-relaxed"
               >
-                Get instant, intelligent feedback on your designs. Upload your work and receive 
-                actionable critiques that help you improve your craft and land better clients.
+                Get instant, intelligent critiques that help you understand what works, what doesn't, 
+                and how to make it better.
               </motion.p>
             </div>
 
@@ -292,16 +865,31 @@ export default function Home() {
             >
               <div className="flex items-center space-x-2">
                 <div className="flex -space-x-2">
-                  {[1,2,3,4,5,6].map((i) => (
+                  {[
+                    { src: '/april_lin.svg', name: 'April Lin' },
+                    { src: '/adriano_alfaro.svg', name: 'Adriano Alfaro' },
+                    { src: '/eric_sherman.svg', name: 'Eric Sherman' },
+                    { src: '/han_noguchi.svg', name: 'Han Noguchi' },
+                    { src: '/kris_rollins.svg', name: 'Kris Rollins' },
+                    { src: null, name: '5+' }
+                  ].map((person, i) => (
                     <div key={i} className="relative">
-                      <div className="w-8 h-8 bg-neutral-300 rounded-full border-2 border-white flex items-center justify-center overflow-hidden">
-                        {i === 6 ? (
-                          <span className="text-xs font-ui font-medium text-neutral-600">5+</span>
+                      <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden">
+                        {person.src ? (
+                          <img 
+                            src={person.src} 
+                            alt={person.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : i === 5 ? (
+                          <div className="w-full h-full bg-gradient-to-br from-primary-400 to-secondary-400 flex items-center justify-center">
+                            <span className="text-xs font-ui font-medium text-white">5+</span>
+                          </div>
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full"></div>
                         )}
                       </div>
-                      {i === 6 && (
+                      {i === 5 && (
                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse border-2 border-white"></div>
                       )}
                     </div>
@@ -324,7 +912,10 @@ export default function Home() {
               >
                 Get Free Feedback
               </button>
-              <button className="border border-neutral-300 hover:border-primary-500 text-neutral-700 hover:text-primary-600 font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200">
+              <button 
+                onClick={() => setShowSampleCritique(true)}
+                className="border border-neutral-300 hover:border-primary-500 text-neutral-700 hover:text-primary-600 font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200"
+              >
                 See Sample Critique
               </button>
             </motion.div>
@@ -364,8 +955,9 @@ export default function Home() {
                       name="designerName"
                       value={formData.designerName}
                       onChange={handleInputChange}
+                      placeholder="Sarah Chen"
                       required
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
                     />
                   </label>
 
@@ -384,8 +976,9 @@ export default function Home() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      placeholder="sarah@example.com"
                       required
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
                     />
                   </label>
 
@@ -397,8 +990,9 @@ export default function Home() {
                       name="projectTitle"
                       value={formData.projectTitle}
                       onChange={handleInputChange}
+                      placeholder="Coffee shop mobile app"
                       required
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
                     />
                   </label>
 
@@ -417,9 +1011,10 @@ export default function Home() {
                       name="projectDescription"
                       value={formData.projectDescription}
                       onChange={handleInputChange}
+                      placeholder="Looking for feedback on the checkout flow and visual hierarchy..."
                       required
                       rows={3}
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
                     />
                   </label>
 
@@ -430,8 +1025,8 @@ export default function Home() {
                       name="designLinks"
                       value={formData.designLinks}
                       onChange={handleInputChange}
-                      placeholder="Figma, Behance, or other design links..."
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                      placeholder="https://figma.com/your-design-link"
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
                     />
                   </label>
                   
@@ -444,17 +1039,31 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div
+                  <motion.div
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onDragEnter={handleDragEnter}
                     onDragLeave={handleDragLeave}
-                    className={`w-full px-4 py-6 border-2 border-dashed rounded-lg font-ui text-neutral-600 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-400
-                      ${isDragActive ? 'border-primary-400 shadow-[0_0_0_4px_rgba(255,115,0,0.15)] bg-primary-50/30 text-primary-600' : 'border-neutral-300 hover:border-primary-400 hover:text-primary-600'}`}
+                    className={`w-full px-4 py-6 border-2 border-dashed rounded-lg font-ui text-neutral-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-400
+                      ${isDragActive ? 'border-primary-400 shadow-[0_0_0_4px_rgba(255,115,0,0.15)] bg-primary-50/30 text-primary-600' : 'border-neutral-300'}`}
                     tabIndex={0}
                     role="button"
                     aria-label="File upload dropzone. Drag and drop files here, or click to browse."
                     onClick={() => fileInputRef.current?.click()}
+                    whileHover={!isDragActive ? {
+                      borderColor: '#ff7300',
+                      color: '#ff7300',
+                      scale: 1.02,
+                      transition: { duration: 0.3, ease: 'easeOut' }
+                    } : {}}
+                    animate={isDragActive ? {
+                      borderColor: ['#ff7300', '#ff9545', '#ff7300'],
+                      transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
+                    } : {
+                      borderColor: '#d4d4d4',
+                      scale: 1
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
                   >
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <motion.svg
@@ -463,15 +1072,15 @@ export default function Home() {
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                         aria-label="Upload files"
-                        animate={isDragActive ? { y: [0, -6, 0], color: '#ff7300' } : { y: 0, color: '#737373' }}
+                        animate={isDragActive ? { y: [0, -6, 0] } : { y: 0 }}
                         transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0, repeatType: 'loop' }}
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </motion.svg>
-                      <span className="font-ui font-medium">Drag & drop files here, or click to browse</span>
+                      <span className="font-ui font-medium">Drop your design here, or click to browse</span>
                       <span className="text-sm">Images, PDFs, Figma exports (max 5 files, 10MB each)</span>
                     </div>
-                  </div>
+                  </motion.div>
 
                   <input
                     ref={fileInputRef}
@@ -531,13 +1140,16 @@ export default function Home() {
                   )}
                 </div>
 
-                <button
+                <motion.button
                   type="submit"
                   disabled={isModalLoading}
-                  className="w-full bg-primary-500 hover:bg-primary-600 text-white font-ui font-medium px-6 py-3 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-ui font-semibold px-6 py-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
                 >
                   {isModalLoading ? 'Submitting...' : 'Submit for Analysis'}
-                </button>
+                </motion.button>
               </form>
             </div>
           </motion.div>
@@ -545,191 +1157,16 @@ export default function Home() {
       </section>
 
       {/* Trust Indicators Section */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center space-y-8">
-            <h2 className="font-display text-3xl font-bold text-neutral-900">
-              Trusted by Designers Worldwide
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary-500 mb-2">2,500+</div>
-                <div className="text-neutral-600">Designers Improved</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary-500 mb-2">15,000+</div>
-                <div className="text-neutral-600">Designs Critiqued</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary-500 mb-2">4.9/5</div>
-                <div className="text-neutral-600">Average Rating</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TrustSection />
 
       {/* Features Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl font-bold text-neutral-900 mb-4">
-              Why Designers Choose The Crit
-            </h2>
-            <p className="font-ui text-xl text-neutral-600 max-w-2xl mx-auto">
-              Get the feedback you need to improve your designs and advance your career
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Instant Feedback</h3>
-              <p className="font-ui text-neutral-600">Get detailed critiques in seconds, not hours or days. No more waiting for feedback.</p>
-            </div>
+      <FeaturesSection />
 
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Educational Insights</h3>
-              <p className="font-ui text-neutral-600">Learn why changes work, not just what to change. Understand design principles.</p>
-            </div>
+      {/* Polished Testimonials Section */}
+      <TestimonialsSection />
 
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                </svg>
-              </div>
-              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Multi-Discipline Analysis</h3>
-              <p className="font-ui text-neutral-600">Get feedback on visual design, UX, accessibility, and more from specialized AI agents.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Supportive Feedback</h3>
-              <p className="font-ui text-neutral-600">Encouraging, constructive critiques that help you grow, not tear you down.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Free to Start</h3>
-              <p className="font-ui text-neutral-600">Try our service completely free. No credit card required, no strings attached.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="font-ui font-semibold text-neutral-900 mb-2">Secure & Private</h3>
-              <p className="font-ui text-neutral-600">Your designs are processed securely and never shared. Your privacy is protected.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl font-bold text-neutral-900 mb-4">
-              What Designers Are Saying
-            </h2>
-            <p className="font-ui text-xl text-neutral-600">
-              Real feedback from real designers who improved their craft
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-neutral-50 p-6 rounded-xl">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="font-ui font-semibold text-primary-600">S</span>
-                </div>
-                <div>
-                  <div className="font-ui font-semibold text-neutral-900">Sarah Chen</div>
-                  <div className="font-ui text-sm text-neutral-600">UI/UX Designer</div>
-                </div>
-              </div>
-              <p className="font-ui text-neutral-700 italic">
-                "The Crit helped me identify issues in my portfolio that I never noticed. I landed my dream job within 2 months!"
-              </p>
-            </div>
-
-            <div className="bg-neutral-50 p-6 rounded-xl">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="font-ui font-semibold text-primary-600">M</span>
-                </div>
-                <div>
-                  <div className="font-ui font-semibold text-neutral-900">Marcus Rodriguez</div>
-                  <div className="font-ui text-sm text-neutral-600">Freelance Designer</div>
-                </div>
-              </div>
-              <p className="font-ui text-neutral-700 italic">
-                "Instant feedback on my client work has been a game-changer. My clients are happier and I'm charging more."
-              </p>
-            </div>
-
-            <div className="bg-neutral-50 p-6 rounded-xl">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="font-ui font-semibold text-primary-600">A</span>
-                </div>
-                <div>
-                  <div className="font-ui font-semibold text-neutral-900">Alex Thompson</div>
-                  <div className="font-ui text-sm text-neutral-600">Student Designer</div>
-                </div>
-              </div>
-              <p className="font-ui text-neutral-700 italic">
-                "As a student, I can't afford expensive mentors. The Crit gives me professional-level feedback for free."
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 text-center">
-          <div className="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl p-12 text-white">
-            <h2 className="font-display text-3xl font-bold mb-4">
-              Ready to Transform Your Designs?
-            </h2>
-            <p className="font-ui text-xl mb-8 opacity-90">
-              Join thousands of designers who are improving their craft with AI-powered feedback
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="bg-white text-primary-600 hover:bg-neutral-100 font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200"
-              >
-                Get Free Feedback Now
-              </button>
-              <button className="border border-white text-white hover:bg-white hover:text-primary-600 font-ui font-medium px-8 py-4 rounded-lg transition-colors duration-200">
-                See How It Works
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Enhanced CTA Section */}
+      <CTASection />
 
       {/* Unified Modal */}
       <SuccessModal
@@ -743,6 +1180,12 @@ export default function Home() {
         message={SUCCESS_MODAL_CONFIG.message}
         loadingTitle="Processing..."
         loadingMessage={SUCCESS_MODAL_CONFIG.loadingMessage}
+      />
+
+      {/* Sample Critique Modal */}
+      <SampleCritiqueModal
+        isOpen={showSampleCritique}
+        onClose={() => setShowSampleCritique(false)}
       />
     </div>
   )

@@ -8,7 +8,7 @@ import { loadAnimationData } from '@/lib/lottie-animations'
 import { ANIMATION_CONFIG, SUCCESS_MODAL_CONFIG } from '@/lib/animation-config'
 import { AnimatePresence, motion, useInView } from 'framer-motion'
 import Tooltip from '@/components/Tooltip'
-import { Users, FileText, Star, Zap, GraduationCap, BarChart3, Heart, Gift, Lock } from 'lucide-react'
+import { Users, FileText, Star, Zap, GraduationCap, BarChart3, Heart, Gift, Lock, Menu, X, ArrowRight } from 'lucide-react'
 
 
 function getFileType(file: File) {
@@ -294,7 +294,7 @@ function FeaturesSection() {
   ]
   
   return (
-    <section className="py-24 bg-neutral-50" ref={ref}>
+    <section className="py-24 bg-neutral-50" ref={ref} id="features-section">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div 
@@ -611,6 +611,491 @@ function CTASection() {
   )
 }
 
+// Professional Header Component
+function Header({ 
+  setShowSampleCritique 
+}: { 
+  setShowSampleCritique: (show: boolean) => void 
+}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const headerHeight = 80 // h-20 = 80px
+      const offsetPosition = element.offsetTop - headerHeight
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+    setIsMenuOpen(false)
+  }
+
+  const scrollToUpload = () => {
+    const element = document.getElementById('upload-section')
+    if (element) {
+      const headerHeight = 80
+      const offsetPosition = element.offsetTop - headerHeight
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+    setIsMenuOpen(false)
+  }
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <motion.div 
+            className="flex items-center"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          >
+            <h1 className="text-2xl font-bold font-display">
+              <span className="text-neutral-900">The</span>{" "}
+              <span className="text-primary-500">Crit</span>
+            </h1>
+          </motion.div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <button
+              onClick={() => scrollToSection('features-section')}
+              className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
+            >
+              How It Works
+            </button>
+            <button
+              onClick={() => setShowSampleCritique(true)}
+              className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
+            >
+              Examples
+            </button>
+            <button
+              onClick={() => {/* Future pricing section */}}
+              className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
+            >
+              Pricing
+            </button>
+            <motion.button
+              onClick={scrollToUpload}
+              className="bg-primary-500 hover:bg-primary-600 text-white font-ui font-semibold px-6 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+            >
+              Get Free Feedback
+            </motion.button>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden border-t border-neutral-200 py-4"
+            >
+              <nav className="flex flex-col space-y-4">
+                <button
+                  onClick={() => scrollToSection('features-section')}
+                  className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
+                >
+                  How It Works
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSampleCritique(true)
+                    setIsMenuOpen(false)
+                  }}
+                  className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
+                >
+                  Examples
+                </button>
+                <button
+                  onClick={() => {/* Future pricing section */}}
+                  className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
+                >
+                  Pricing
+                </button>
+                <motion.button
+                  onClick={scrollToUpload}
+                  className="bg-primary-500 hover:bg-primary-600 text-white font-ui font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-center"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  Get Free Feedback
+                </motion.button>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </header>
+  )
+}
+
+// Newsletter Signup Section Component
+function NewsletterSection() {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: "-80px" })
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!email) {
+      setErrorMessage('Email address is required')
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 3000)
+      return
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMessage('Please enter a valid email address')
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 3000)
+      return
+    }
+
+    setStatus('loading')
+    setErrorMessage('')
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      setStatus('success')
+      setEmail('')
+      setTimeout(() => setStatus('idle'), 4000)
+    } catch (error) {
+      setErrorMessage('Something went wrong. Please try again.')
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 3000)
+    }
+  }
+
+  return (
+    <section className="py-16 bg-primary-50 border-t border-primary-100" ref={ref}>
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="max-w-2xl mx-auto text-center"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mb-8"
+          >
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-neutral-900 mb-4 leading-tight">
+              Level Up Your{" "}
+              <span className="text-primary-500">Design Skills</span>
+            </h2>
+            <p className="font-ui text-lg md:text-xl text-neutral-600 leading-relaxed">
+              Join 2,800+ designers getting weekly design tips, critiques, and industry insights
+            </p>
+          </motion.div>
+
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="space-y-6"
+          >
+            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <div className="flex-1">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  disabled={status === 'loading'}
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300 disabled:opacity-50 bg-white"
+                />
+              </div>
+              <motion.button
+                type="submit"
+                disabled={status === 'loading' || !email}
+                className="bg-primary-500 hover:bg-primary-600 disabled:bg-neutral-300 text-white font-ui font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-2 min-w-[140px]"
+                whileHover={{ scale: status === 'loading' ? 1 : 1.02 }}
+                whileTap={{ scale: status === 'loading' ? 1 : 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                {status === 'loading' ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  'Get Design Tips'
+                )}
+              </motion.button>
+            </div>
+
+            <div className="min-h-[20px]">
+              <AnimatePresence>
+                {status === 'success' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-success-600 font-ui text-sm flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Successfully subscribed! Check your email for confirmation.
+                  </motion.div>
+                )}
+                {status === 'error' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-red-600 font-ui text-sm flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {errorMessage}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-neutral-500 font-ui text-sm"
+            >
+              No spam. Unsubscribe anytime.
+            </motion.p>
+          </motion.form>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+// Comprehensive Footer Component
+function Footer({ 
+  setShowSampleCritique 
+}: { 
+  setShowSampleCritique: (show: boolean) => void 
+}) {
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const headerHeight = 80 // h-20 = 80px
+      const offsetPosition = element.offsetTop - headerHeight
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newsletterEmail) return
+
+    setNewsletterStatus('loading')
+    
+    // Simulate API call for newsletter signup
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setNewsletterStatus('success')
+      setNewsletterEmail('')
+      setTimeout(() => setNewsletterStatus('idle'), 3000)
+    } catch (error) {
+      setNewsletterStatus('error')
+      setTimeout(() => setNewsletterStatus('idle'), 3000)
+    }
+  }
+
+  const quickLinks = [
+    { label: 'How It Works', onClick: () => scrollToSection('features-section') },
+    { label: 'Sample Critique', onClick: () => setShowSampleCritique(true) },
+    { label: 'Privacy Policy', onClick: () => {/* Future implementation */} },
+    { label: 'Terms of Service', onClick: () => {/* Future implementation */} },
+    { label: 'Contact', onClick: () => {/* Future implementation */} }
+  ]
+
+  return (
+    <footer className="bg-neutral-50 border-t border-neutral-200">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid md:grid-cols-3 gap-12">
+          
+          {/* Left Column - Brand */}
+          <div className="space-y-6">
+            <motion.div 
+              className="flex items-center"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h2 className="text-2xl font-bold font-display">
+                <span className="text-neutral-900">The</span>{" "}
+                <span className="text-primary-500">Crit</span>
+              </h2>
+            </motion.div>
+            
+            <p className="text-neutral-600 font-ui leading-relaxed max-w-sm">
+              AI-powered design feedback that actually helps you improve. Get professional insights in seconds, not days.
+            </p>
+            
+            {/* Future: Social media links can be added here */}
+          </div>
+
+          {/* Middle Column - Quick Links */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold font-ui text-neutral-900">
+              Quick Links
+            </h3>
+            
+            <nav className="space-y-4">
+              {quickLinks.map((link, index) => (
+                <motion.button
+                  key={index}
+                  onClick={link.onClick}
+                  className="block text-neutral-600 hover:text-primary-500 font-ui transition-colors duration-200 text-left"
+                  whileHover={{ x: 4 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {link.label}
+                </motion.button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Right Column - Newsletter Signup */}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold font-ui text-neutral-900 mb-2">
+                Design Tips Newsletter
+              </h3>
+              <p className="text-neutral-600 font-ui text-sm leading-relaxed">
+                Get weekly design insights and tips delivered to your inbox
+              </p>
+            </div>
+            
+            <form onSubmit={handleNewsletterSubmit} className="space-y-4">
+              <div className="relative">
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  disabled={newsletterStatus === 'loading'}
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300 disabled:opacity-50"
+                />
+              </div>
+              
+              <motion.button
+                type="submit"
+                disabled={newsletterStatus === 'loading' || !newsletterEmail}
+                className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-neutral-300 text-white font-ui font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+                whileHover={{ scale: newsletterStatus === 'loading' ? 1 : 1.02 }}
+                whileTap={{ scale: newsletterStatus === 'loading' ? 1 : 0.98 }}
+                transition={{ duration: 0.2 }}
+              >
+                {newsletterStatus === 'loading' ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Subscribe
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </motion.button>
+              
+              {/* Status Messages */}
+              <AnimatePresence>
+                {newsletterStatus === 'success' && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-success-600 font-ui text-sm"
+                  >
+                    ✓ Successfully subscribed! Check your email.
+                  </motion.p>
+                )}
+                {newsletterStatus === 'error' && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-red-600 font-ui text-sm"
+                  >
+                    ✗ Something went wrong. Please try again.
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </form>
+          </div>
+        </div>
+        
+        {/* Copyright Section */}
+        <div className="border-t border-neutral-200 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-neutral-500 font-ui text-sm">
+              © 2024 The Crit. All rights reserved.
+            </p>
+            
+            {/* Future: Additional footer links can be added here */}
+            <div className="flex items-center gap-6 text-sm text-neutral-500">
+              <button 
+                onClick={() => {/* Future privacy policy */}}
+                className="hover:text-neutral-700 transition-colors duration-200"
+              >
+                Privacy
+              </button>
+              <button 
+                onClick={() => {/* Future terms */}}
+                className="hover:text-neutral-700 transition-colors duration-200"
+              >
+                Terms
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
 export default function Home() {
   const [formData, setFormData] = useState<FormDataType>({
     designerName: '',
@@ -806,8 +1291,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
+      {/* Header */}
+      <Header setShowSampleCritique={setShowSampleCritique} />
+      
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 pt-32 pb-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Column - Hero Content */}
@@ -1165,8 +1653,14 @@ export default function Home() {
       {/* Polished Testimonials Section */}
       <TestimonialsSection />
 
+      {/* Newsletter Signup Section */}
+      <NewsletterSection />
+
       {/* Enhanced CTA Section */}
       <CTASection />
+
+      {/* Footer */}
+      <Footer setShowSampleCritique={setShowSampleCritique} />
 
       {/* Unified Modal */}
       <SuccessModal

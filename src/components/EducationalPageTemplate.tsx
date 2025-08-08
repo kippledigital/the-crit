@@ -421,7 +421,9 @@ export default function EducationalPageTemplate({ data }: EducationalPageProps) 
                 {data.content.interactiveElements.length > 0 && (
                   <div className="space-y-12 my-16">
                     {data.content.interactiveElements.map((element) => (
-                      <InteractiveSection key={element.id} element={element} />
+                      <div key={element.id} id={element.id} className="scroll-mt-24">
+                        <InteractiveSection element={element} />
+                      </div>
                     ))}
                   </div>
                 )}

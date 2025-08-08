@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Clock, Users, Search, Filter, ArrowRight, BookOpen, Lightbulb, Palette, Layout, Tag, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
@@ -9,28 +9,8 @@ import { EducationalContentCard } from '@/types/educational-content'
 
 const CATEGORIES = ['All', 'Fundamentals', 'Color Theory', 'Tutorials', 'Problem Solving', 'Education']
 const DIFFICULTIES = ['All', 'Beginner', 'Intermediate', 'Advanced']
-type SortOption = 'Newest' | 'Popular' | 'A-Z' | 'Reading time (short)' | 'Reading time (long)'
 
-function RecentSearches({ items, onSelect, onClear }: { items: string[]; onSelect: (term: string) => void; onClear: () => void }) {
-  if (!items || items.length === 0) return null
-  return (
-    <div className="flex items-center gap-2 flex-wrap text-sm">
-      <span className="text-neutral-500 font-ui">Recent:</span>
-      {items.map((term) => (
-        <button
-          key={term}
-          onClick={() => onSelect(term)}
-          className="px-3 py-1 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-ui"
-        >
-          {term}
-        </button>
-      ))}
-      <button onClick={onClear} className="text-neutral-500 hover:text-neutral-700 underline font-ui">Clear</button>
-    </div>
-  )
-}
-
-function SearchBar({ searchTerm, onSearchChange, onSearchSubmit }: { searchTerm: string, onSearchChange: (term: string) => void, onSearchSubmit: (term: string) => void }) {
+function SearchBar({ searchTerm, onSearchChange }: { searchTerm: string, onSearchChange: (term: string) => void }) {
   return (
     <div className="relative">
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
@@ -39,11 +19,6 @@ function SearchBar({ searchTerm, onSearchChange, onSearchSubmit }: { searchTerm:
         placeholder="Search design topics..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && searchTerm.trim()) {
-            onSearchSubmit(searchTerm.trim())
-          }
-        }}
         className="w-full pl-12 pr-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300 bg-white"
       />
     </div>
@@ -268,22 +243,6 @@ export default function ResourcesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedDifficulty, setSelectedDifficulty] = useState('All')
-  const [sortBy, setSortBy] = useState<SortOption>('Newest')
-  const [recentSearches, setRecentSearches] = useState<string[]>([])
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('recentSearches') || '[]') as string[]
-      if (Array.isArray(saved)) setRecentSearches(saved.slice(0, 6))
-    } catch {}
-  }, [])
-
-  const saveRecentSearch = (term: string) => {
-    if (!term) return
-    const next = [term, ...recentSearches.filter((t) => t !== term)].slice(0, 6)
-    setRecentSearches(next)
-    try { localStorage.setItem('recentSearches', JSON.stringify(next)) } catch {}
-  }
 
   const filteredCards = EDUCATIONAL_CONTENT_CARDS.filter(card => {
     const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -295,26 +254,6 @@ export default function ResourcesPage() {
 
     return matchesSearch && matchesCategory && matchesDifficulty
   })
-
-  const sortedCards = [...filteredCards].sort((a, b) => {
-    switch (sortBy) {
-      case 'Popular':
-        return b.searchVolume - a.searchVolume
-      case 'A-Z':
-        return a.title.localeCompare(b.title)
-      case 'Reading time (short)':
-        return a.readingTime - b.readingTime
-      case 'Reading time (long)':
-        return b.readingTime - a.readingTime
-      case 'Newest':
-      default:
-        return new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime()
-    }
-  })
-
-  const trendingCards = [...EDUCATIONAL_CONTENT_CARDS]
-    .sort((a, b) => b.searchVolume - a.searchVolume)
-    .slice(0, 3)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-primary-50/10">
@@ -375,48 +314,13 @@ export default function ResourcesPage() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Trending strip */}
-      <section className="py-6">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto bg-white border border-neutral-200 rounded-xl p-4 flex items-center gap-3 overflow-x-auto">
-            <div className="inline-flex items-center gap-2 text-success-600 font-ui font-medium whitespace-nowrap">
-              <TrendingUp className="w-4 h-4" /> Trending
-            </div>
-            <div className="h-5 w-px bg-neutral-200" />
-            <div className="flex items-center gap-3">
-              {trendingCards.map((card) => (
-                <Link
-                  key={card.slug}
-                  href={`/resources/${card.slug}`}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-50 border border-neutral-200 hover:border-primary-300 hover:bg-primary-50/50 text-neutral-700 font-ui text-sm whitespace-nowrap"
-                >
-                  <Tag className="w-3 h-3" />
-                  {card.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Search and Filters */}
       <section className="py-12 bg-white border-t border-neutral-100">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto space-y-8">
             {/* Search */}
             <div className="max-w-2xl mx-auto">
-              <SearchBar 
-                searchTerm={searchTerm} 
-                onSearchChange={setSearchTerm}
-                onSearchSubmit={(term) => saveRecentSearch(term)}
-              />
-              <div className="mt-3">
-                <RecentSearches
-                  items={recentSearches}
-                  onSelect={(term) => setSearchTerm(term)}
-                  onClear={() => { setRecentSearches([]); try { localStorage.removeItem('recentSearches') } catch {} }}
-                />
-              </div>
+              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             </div>
 
             {/* Filters */}
@@ -435,32 +339,17 @@ export default function ResourcesPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
             {/* Results Info */}
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="mb-8">
               <p className="font-ui text-neutral-600">
-                Showing {sortedCards.length} {sortedCards.length === 1 ? 'result' : 'results'}
+                Showing {filteredCards.length} {filteredCards.length === 1 ? 'result' : 'results'}
                 {searchTerm && ` for "${searchTerm}"`}
               </p>
-              <div className="flex items-center gap-2">
-                <label htmlFor="sort" className="font-ui text-sm text-neutral-600">Sort by</label>
-                <select
-                  id="sort"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="font-ui text-sm border border-neutral-300 rounded-md px-3 py-2 bg-white hover:border-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                >
-                  <option>Newest</option>
-                  <option>Popular</option>
-                  <option>A-Z</option>
-                  <option>Reading time (short)</option>
-                  <option>Reading time (long)</option>
-                </select>
-              </div>
             </div>
 
             {/* Cards Grid */}
             {filteredCards.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {sortedCards.map((card, index) => (
+                {filteredCards.map((card, index) => (
                   <ContentCard key={card.slug} card={card} index={index} />
                 ))}
               </div>

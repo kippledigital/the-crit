@@ -305,14 +305,6 @@ export default function EducationalPageTemplate({ data }: EducationalPageProps) 
                 <span>{data.metadata.readingTime} min read</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>Published {new Date(data.metadata.publishedDate).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>Updated {new Date(data.metadata.lastUpdated).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 <span>{data.metadata.targetAudience.join(', ')}</span>
               </div>

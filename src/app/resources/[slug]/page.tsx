@@ -112,7 +112,7 @@ export default function ResourcePage({ params }: PageProps) {
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
               { '@type': 'ListItem', position: 2, name: 'Resources', item: '/resources' },
-              { '@type': 'ListItem', position: 3, name: content.metadata.title, item: content.seo.canonicalUrl },
+              { '@type': 'ListItem', position: 3, name: metadata.title, item: content.seo.canonicalUrl },
             ],
           }),
         }}

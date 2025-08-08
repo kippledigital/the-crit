@@ -257,6 +257,23 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-primary-50/10">
+      {/* JSON-LD: ItemList for resources index */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            itemListElement: EDUCATIONAL_CONTENT_CARDS.map((card, index) => ({
+              '@type': 'ListItem',
+              position: index + 1,
+              url: `/resources/${card.slug}`,
+              name: card.title,
+              description: card.description,
+            })),
+          }),
+        }}
+      />
       {/* Header */}
       <div className="bg-white border-b border-neutral-200 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">

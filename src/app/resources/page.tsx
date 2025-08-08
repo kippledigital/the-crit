@@ -274,6 +274,30 @@ export default function ResourcesPage() {
           }),
         }}
       />
+      {/* JSON-LD: BreadcrumbList for resources index */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: '/',
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Resources',
+                item: '/resources',
+              },
+            ],
+          }),
+        }}
+      />
       {/* Header */}
       <div className="bg-white border-b border-neutral-200 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">

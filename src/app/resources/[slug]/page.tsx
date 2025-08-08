@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: 'summary_large_image',
       title: metadata.title,
       description: metadata.description,
-      images: seo.ogImage ? [seo.ogImage] : [],
+      images: seo.ogImage ? [seo.ogImage] : undefined,
     },
     other: {
       'article:author': 'The Crit',
@@ -100,6 +100,21 @@ export default function ResourcePage({ params }: PageProps) {
             wordCount: content.content.sections.reduce((acc, section) => acc + section.content.split(' ').length, 0),
             timeRequired: `PT${content.metadata.readingTime}M`,
           })
+        }}
+      />
+      {/* JSON-LD Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
+              { '@type': 'ListItem', position: 2, name: 'Resources', item: '/resources' },
+              { '@type': 'ListItem', position: 3, name: metadata.title, item: content.seo.canonicalUrl },
+            ],
+          }),
         }}
       />
       

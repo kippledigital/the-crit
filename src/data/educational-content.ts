@@ -435,7 +435,7 @@ export const DESIGN_MISTAKES_CONTENT: EducationalPageTemplate = {
     ]
   },
   seo: {
-    canonicalUrl: "https://thecrit.com/resources/design-mistakes",
+    canonicalUrl: "https://thecrit.co/resources/design-mistakes",
     schemaMarkup: {
       "@context": "https://schema.org",
       "@type": "Article",
@@ -814,7 +814,7 @@ export const COLOR_WHEEL_CONTENT: EducationalPageTemplate = {
     ]
   },
   seo: {
-    canonicalUrl: "https://thecrit.com/resources/how-to-use-color-wheel",
+    canonicalUrl: "https://thecrit.co/resources/how-to-use-color-wheel",
     schemaMarkup: {
       "@context": "https://schema.org",
       "@type": "Article",
@@ -1219,7 +1219,7 @@ export const GRAPHIC_DESIGN_TUTORIAL_CONTENT: EducationalPageTemplate = {
     ]
   },
   seo: {
-    canonicalUrl: "https://thecrit.com/resources/graphic-design-tutorial",
+    canonicalUrl: "https://thecrit.co/resources/graphic-design-tutorial",
     schemaMarkup: {
       "@context": "https://schema.org",
       "@type": "Article",
@@ -1665,7 +1665,7 @@ export const DESIGN_FUNDAMENTALS_FOR_STUDENTS_CONTENT: EducationalPageTemplate =
     ]
   },
   seo: {
-    canonicalUrl: "https://thecrit.com/resources/design-fundamentals-for-students",
+    canonicalUrl: "https://thecrit.co/resources/design-fundamentals-for-students",
     schemaMarkup: {
       "@context": "https://schema.org",
       "@type": "Course",
@@ -2043,7 +2043,7 @@ export const DESIGN_PRINCIPLES_CONTENT: EducationalPageTemplate = {
     ]
   },
   seo: {
-    canonicalUrl: "https://thecrit.com/resources/design-principles-for-beginners",
+    canonicalUrl: "https://thecrit.co/resources/design-principles-for-beginners",
     schemaMarkup: {
       "@context": "https://schema.org",
       "@type": "Article",

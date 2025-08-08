@@ -11,11 +11,12 @@
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.43",
     "@jschuller/perplexity-mcp": "^2.0.1",
+    "dataforseo-mcp-server": "^2.7.2",
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.525.0",
-    "next": "14.0.4",
+    "next": "^14.2.31",
     "react": "^18",
     "react-dom": "^18"
   },

@@ -2,12 +2,13 @@
 
 import React, { useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Clock, Users, Search, Filter, ArrowRight, BookOpen, Lightbulb, Palette, Layout, Tag, TrendingUp } from 'lucide-react'
+import { Clock, Users, Search, Filter, ArrowRight, BookOpen, Lightbulb, Palette, Layout, Tag, TrendingUp, FileText, Settings, MessageSquare, Briefcase } from 'lucide-react'
 import Link from 'next/link'
 import { EDUCATIONAL_CONTENT_CARDS } from '@/data/educational-content'
 import { EducationalContentCard } from '@/types/educational-content'
+import { Breadcrumbs } from '@/components'
 
-const CATEGORIES = ['All', 'Fundamentals', 'Color Theory', 'Tutorials', 'Problem Solving', 'Education']
+const CATEGORIES = ['All', 'Portfolio Development', 'Tool Comparison', 'Feedback & Community', 'Career & Jobs', 'Fundamentals', 'Color Theory', 'Tutorials', 'Problem Solving', 'Education']
 const DIFFICULTIES = ['All', 'Beginner', 'Intermediate', 'Advanced']
 
 function SearchBar({ searchTerm, onSearchChange }: { searchTerm: string, onSearchChange: (term: string) => void }) {
@@ -37,10 +38,10 @@ function FilterBar({
   onDifficultyChange: (difficulty: string) => void
 }) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
-      <div className="flex-1">
-        <label className="block text-sm font-medium text-neutral-700 mb-2 font-ui">Category</label>
-        <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-6 items-center">
+      <div className="w-full max-w-5xl">
+        <label className="block text-sm font-medium text-neutral-700 mb-2 font-ui text-center">Category</label>
+        <div className="flex flex-wrap justify-center gap-2">
           {CATEGORIES.map((category) => (
             <button
               key={category}
@@ -57,9 +58,9 @@ function FilterBar({
         </div>
       </div>
       
-      <div className="flex-1">
-        <label className="block text-sm font-medium text-neutral-700 mb-2 font-ui">Difficulty</label>
-        <div className="flex flex-wrap gap-2">
+      <div className="w-full max-w-5xl">
+        <label className="block text-sm font-medium text-neutral-700 mb-2 font-ui text-center">Difficulty</label>
+        <div className="flex flex-wrap justify-center gap-2">
           {DIFFICULTIES.map((difficulty) => (
             <button
               key={difficulty}
@@ -85,6 +86,10 @@ function ContentCard({ card, index }: { card: EducationalContentCard, index: num
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
+      case 'Portfolio Development': return <FileText className="w-5 h-5" />
+      case 'Tool Comparison': return <Settings className="w-5 h-5" />
+      case 'Feedback & Community': return <MessageSquare className="w-5 h-5" />
+      case 'Career & Jobs': return <Briefcase className="w-5 h-5" />
       case 'Fundamentals': return <BookOpen className="w-5 h-5" />
       case 'Color Theory': return <Palette className="w-5 h-5" />
       case 'Tutorials': return <Layout className="w-5 h-5" />
@@ -244,6 +249,11 @@ export default function ResourcesPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedDifficulty, setSelectedDifficulty] = useState('All')
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Resources', active: true }
+  ]
+
   const filteredCards = EDUCATIONAL_CONTENT_CARDS.filter(card => {
     const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          card.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -257,6 +267,8 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-primary-50/10">
+      <Breadcrumbs items={breadcrumbItems} />
+      
       {/* JSON-LD: ItemList for resources index */}
       <script
         type="application/ld+json"
@@ -298,18 +310,6 @@ export default function ResourcesPage() {
           }),
         }}
       />
-      {/* Header */}
-      <div className="bg-white border-b border-neutral-200 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-neutral-600 hover:text-primary-600 transition-colors font-ui font-medium"
-          >
-            <ArrowRight className="w-4 h-4 rotate-180" />
-            Back to Home
-          </Link>
-        </div>
-      </div>
 
       {/* Hero Section */}
       <HeroSection />
@@ -381,27 +381,64 @@ export default function ResourcesPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-primary-500 to-secondary-500">
+      <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
+          <div className="bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl p-8 md:p-12 text-white text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
               Ready to Apply What You've Learned?
             </h2>
-            <p className="font-ui text-lg mb-8 opacity-90">
+            <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
               Get AI-powered feedback on your designs to see how well you're applying these principles.
             </p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 bg-white text-primary-600 hover:bg-neutral-50 font-ui font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="inline-flex items-center gap-2 bg-white text-primary-600 hover:bg-neutral-50 font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Get Free Design Feedback
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4" />
               </Link>
-            </motion.div>
+              
+              <Link
+                href="/tools"
+                className="inline-flex items-center gap-2 border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold px-8 py-4 rounded-xl transition-all duration-300"
+              >
+                Try Design Tools
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Newsletter CTA Section */}
+      <section className="py-20 bg-white border-t border-neutral-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="bg-gradient-to-br from-neutral-50 to-primary-50/30 rounded-2xl p-8 border border-neutral-200 max-w-2xl mx-auto">
+              <h3 className="text-xl font-bold text-neutral-900 mb-4">
+                Stay Updated with Design Education
+              </h3>
+              <p className="text-neutral-600 mb-6">
+                Get notified when we publish new design guides, tutorials, and educational content. No spam, just valuable design insights.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+                <button className="bg-primary-500 hover:bg-primary-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200">
+                  Subscribe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   )
 }

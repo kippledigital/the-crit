@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { fraunces, satoshi } from '@/lib/fonts'
+import { SiteHeader, SiteFooter } from '@/components'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -37,7 +38,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fraunces.variable} ${satoshi.variable}`}>
       <body className={`${inter.className} antialiased`}>
+        <SiteHeader />
         {children}
+        <SiteFooter />
       </body>
     </html>
   )

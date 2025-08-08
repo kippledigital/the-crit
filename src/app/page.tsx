@@ -8,7 +8,9 @@ import { loadAnimationData } from '@/lib/lottie-animations'
 import { ANIMATION_CONFIG, SUCCESS_MODAL_CONFIG } from '@/lib/animation-config'
 import { AnimatePresence, motion, useInView } from 'framer-motion'
 import Tooltip from '@/components/Tooltip'
-import { Users, FileText, Star, Zap, GraduationCap, BarChart3, Heart, Gift, Lock, Menu, X, ArrowRight } from 'lucide-react'
+import { Users, FileText, Star, Zap, GraduationCap, BarChart3, Heart, Gift, Lock, Menu, X, ArrowRight, Upload, Sparkles } from 'lucide-react'
+import Link from 'next/link'
+// Global header/footer are now provided by the root layout
 
 
 function getFileType(file: File) {
@@ -443,7 +445,7 @@ function TestimonialsSection() {
   ]
   
   return (
-    <section className="py-20 bg-gradient-to-br from-neutral-50 to-primary-50/10" ref={ref}>
+    <section id="examples" className="py-20 bg-gradient-to-br from-neutral-50 to-primary-50/10" ref={ref}>
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div 
@@ -675,12 +677,18 @@ function Header({
             >
               Examples
             </button>
-            <button
-              onClick={() => window.location.href = '/resources'}
+            <Link
+              href="/resources"
               className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
             >
               Resources
-            </button>
+            </Link>
+            <Link
+              href="/tools"
+              className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
+            >
+              Tools
+            </Link>
             <button
               onClick={() => {/* Future pricing section */}}
               className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
@@ -738,15 +746,20 @@ function Header({
                 >
                   Examples
                 </button>
-                <button
-                  onClick={() => {
-                    window.location.href = '/resources'
-                    setIsMenuOpen(false)
-                  }}
+                <Link
+                  href="/resources"
                   className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Resources
-                </button>
+                </Link>
+                <Link
+                  href="/tools"
+                  className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Tools
+                </Link>
                 <button
                   onClick={() => {/* Future pricing section */}}
                   className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
@@ -1119,7 +1132,7 @@ export default function Home() {
     projectDescription: '',
     designLinks: '',
     files: [],
-    designerSkillLevel: 'Beginner', // NEW FIELD
+    designerSkillLevel: 'Beginner',
   })
   
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -1132,6 +1145,7 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   const [isDragActive, setIsDragActive] = useState(false)
+  const [currentStep, setCurrentStep] = useState<'upload' | 'details'>('upload')
 
   // File validation constants
   const MAX_FILES = 5
@@ -1162,10 +1176,11 @@ export default function Home() {
       projectDescription: '',
       designLinks: '',
       files: [],
-      designerSkillLevel: 'Beginner', // NEW FIELD
+      designerSkillLevel: 'Beginner',
     })
     setSubmitStatus('idle')
     setSubmitMessage('')
+    setCurrentStep('upload')
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -1268,7 +1283,7 @@ export default function Home() {
       
       // Append text fields
       formDataToSend.append('designerName', formData.designerName)
-      formDataToSend.append('designerSkillLevel', formData.designerSkillLevel) // NEW FIELD
+      formDataToSend.append('designerSkillLevel', formData.designerSkillLevel)
       formDataToSend.append('email', formData.email)
       formDataToSend.append('projectTitle', formData.projectTitle)
       formDataToSend.append('projectDescription', formData.projectDescription)
@@ -1309,8 +1324,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
-      {/* Header */}
-      <Header setShowSampleCritique={setShowSampleCritique} />
+      {/* Header provided by root layout */}
       
       {/* Hero Section */}
       <section className="container mx-auto px-4 pt-32 pb-16">
@@ -1325,7 +1339,7 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
                 className="flex items-center space-x-2 text-primary-600 font-ui text-sm"
               >
-                <span className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
+                <Sparkles className="w-4 h-4" />
                 <span>AI-Powered Design Feedback</span>
               </motion.div>
               
@@ -1427,7 +1441,7 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Right Column - Upload Card */}
+          {/* Right Column - Streamlined Upload Card */}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -1452,120 +1466,14 @@ export default function Home() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-3">
-                  <label className="block">
-                    <span className="font-ui font-medium text-neutral-700">Designer Name *</span>
-                    <input
-                      type="text"
-                      name="designerName"
-                      value={formData.designerName}
-                      onChange={handleInputChange}
-                      placeholder="Sarah Chen"
-                      required
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
-                    />
-                  </label>
-
-                  {/* Designer Skill Level - Compact Horizontal Radio Group */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <span className="font-ui font-medium text-neutral-700">Skill Level</span>
-                    <div className="flex flex-row gap-2 mt-1">
-                      {['Beginner', 'Intermediate', 'Advanced'].map((level) => (
-                        <label key={level} className={`px-3 py-1 rounded-full border font-ui text-sm cursor-pointer transition-colors duration-200
-                          ${formData.designerSkillLevel === level
-                            ? 'bg-primary-500 text-white border-primary-500'
-                            : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary-400'}
-                        `}>
-                          <input
-                            type="radio"
-                            name="designerSkillLevel"
-                            value={level}
-                            checked={formData.designerSkillLevel === level}
-                            onChange={e => setFormData(prev => ({ ...prev, designerSkillLevel: e.target.value }))}
-                            className="sr-only"
-                          />
-                          {level}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <label className="block">
-                    <span className="font-ui font-medium text-neutral-700 flex items-center gap-1">
-                      Email *
-                      <Tooltip content="We'll only use your email to send your critique. It won't be shared.">
-                        <svg className="w-4 h-4 text-orange-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Email info">
-                          <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" />
-                        </svg>
-                      </Tooltip>
-                    </span>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="sarah@example.com"
-                      required
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="font-ui font-medium text-neutral-700">Project Title *</span>
-                    <span className="text-xs text-neutral-400 float-right mt-1">100/100</span>
-                    <input
-                      type="text"
-                      name="projectTitle"
-                      value={formData.projectTitle}
-                      onChange={handleInputChange}
-                      placeholder="Coffee shop mobile app"
-                      required
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="font-ui font-medium text-neutral-700 flex items-center gap-1">
-                      Project Description *
-                      <Tooltip content="Describe your project and what kind of feedback you want.">
-                        <svg className="w-4 h-4 text-orange-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Description info">
-                          <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" />
-                        </svg>
-                      </Tooltip>
-                    </span>
-                    <span className="text-xs text-neutral-400 float-right mt-1">300/300</span>
-                    <textarea
-                      name="projectDescription"
-                      value={formData.projectDescription}
-                      onChange={handleInputChange}
-                      placeholder="Looking for feedback on the checkout flow and visual hierarchy..."
-                      required
-                      rows={3}
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="font-ui font-medium text-neutral-700">Design Links (Optional)</span>
-                    <input
-                      type="text"
-                      name="designLinks"
-                      value={formData.designLinks}
-                      onChange={handleInputChange}
-                      placeholder="https://figma.com/your-design-link"
-                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
-                    />
-                  </label>
-                  
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-neutral-300" />
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-neutral-500 font-ui">and/or</span>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Step 1: Upload Files */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-ui font-semibold text-neutral-900">Step 1: Upload Your Design</h3>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                      <span className="text-sm text-neutral-500">Required</span>
                     </div>
                   </div>
 
@@ -1574,41 +1482,23 @@ export default function Home() {
                     onDragOver={handleDragOver}
                     onDragEnter={handleDragEnter}
                     onDragLeave={handleDragLeave}
-                    className={`w-full px-4 py-6 border-2 border-dashed rounded-lg font-ui text-neutral-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-400
-                      ${isDragActive ? 'border-primary-400 shadow-[0_0_0_4px_rgba(255,115,0,0.15)] bg-primary-50/30 text-primary-600' : 'border-neutral-300'}`}
+                    className={`w-full px-6 py-8 border-2 border-dashed rounded-xl font-ui text-neutral-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-400 transition-all duration-300
+                      ${isDragActive ? 'border-primary-400 shadow-[0_0_0_4px_rgba(255,115,0,0.15)] bg-primary-50/30 text-primary-600' : 'border-neutral-300 hover:border-primary-400'}`}
                     tabIndex={0}
                     role="button"
                     aria-label="File upload dropzone. Drag and drop files here, or click to browse."
                     onClick={() => fileInputRef.current?.click()}
                     whileHover={!isDragActive ? {
-                      borderColor: '#ff7300',
-                      color: '#ff7300',
                       scale: 1.02,
                       transition: { duration: 0.3, ease: 'easeOut' }
                     } : {}}
-                    animate={isDragActive ? {
-                      borderColor: ['#ff7300', '#ff9545', '#ff7300'],
-                      transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
-                    } : {
-                      borderColor: '#d4d4d4',
-                      scale: 1
-                    }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
                   >
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <motion.svg
-                        className="w-8 h-8"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-label="Upload files"
-                        animate={isDragActive ? { y: [0, -6, 0] } : { y: 0 }}
-                        transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0, repeatType: 'loop' }}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </motion.svg>
-                      <span className="font-ui font-medium">Drop your design here, or click to browse</span>
-                      <span className="text-sm">Images, PDFs, Figma exports (max 5 files, 5MB each)</span>
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <Upload className="w-8 h-8 text-neutral-400" />
+                      <div className="text-center">
+                        <p className="font-ui font-medium text-neutral-700">Drop your design here, or click to browse</p>
+                        <p className="text-sm text-neutral-500 mt-1">Images, PDFs, Figma exports (max 5 files, 5MB each)</p>
+                      </div>
                     </div>
                   </motion.div>
 
@@ -1633,32 +1523,19 @@ export default function Home() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, x: 40, scale: 0.95 }}
                             transition={{ duration: 0.25 }}
-                            className="flex items-center justify-between p-2 bg-neutral-50 rounded shadow-sm"
+                            className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg shadow-sm"
                           >
                             <div className="flex items-center min-w-0 flex-1">
-                              <motion.div
-                                initial={{ opacity: 0, x: -16 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -16 }}
-                                transition={{ duration: 0.25 }}
-                              >
-                                <FilePreview file={file} />
-                              </motion.div>
+                              <FilePreview file={file} />
                               <span className="font-ui text-sm text-neutral-600 truncate" title={file.name}>{file.name}</span>
                             </div>
                             <button
                               type="button"
                               aria-label={`Remove file ${file.name}`}
-                              tabIndex={0}
                               onClick={() => removeFile(index)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter' || e.key === ' ') removeFile(index)
-                              }}
-                              className="text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 rounded"
+                              className="text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 rounded p-1"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
+                              <X className="w-4 h-4" />
                             </button>
                           </motion.div>
                         ))}
@@ -1666,8 +1543,85 @@ export default function Home() {
                     </div>
                   )}
                   {fileError && (
-                    <div className="text-red-500 text-sm mt-1">{fileError}</div>
+                    <div className="text-red-500 text-sm">{fileError}</div>
                   )}
+                </div>
+
+                {/* Step 2: Project Details */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-ui font-semibold text-neutral-900">Step 2: Project Details</h3>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                      <span className="text-sm text-neutral-500">Required</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label className="block">
+                      <span className="font-ui font-medium text-neutral-700">Name *</span>
+                      <input
+                        type="text"
+                        name="designerName"
+                        value={formData.designerName}
+                        onChange={handleInputChange}
+                        placeholder="Sarah Chen"
+                        required
+                        className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="font-ui font-medium text-neutral-700">Email *</span>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="sarah@example.com"
+                        required
+                        className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="block">
+                    <span className="font-ui font-medium text-neutral-700">Project Title *</span>
+                    <input
+                      type="text"
+                      name="projectTitle"
+                      value={formData.projectTitle}
+                      onChange={handleInputChange}
+                      placeholder="Coffee shop mobile app"
+                      required
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="font-ui font-medium text-neutral-700">What feedback do you want? *</span>
+                    <textarea
+                      name="projectDescription"
+                      value={formData.projectDescription}
+                      onChange={handleInputChange}
+                      placeholder="Looking for feedback on the checkout flow and visual hierarchy..."
+                      required
+                      rows={3}
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="font-ui font-medium text-neutral-700">Design Links (Optional)</span>
+                    <input
+                      type="text"
+                      name="designLinks"
+                      value={formData.designLinks}
+                      onChange={handleInputChange}
+                      placeholder="https://figma.com/your-design-link"
+                      className="mt-1 block w-full px-4 py-3 border border-neutral-300 rounded-lg font-ui focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-neutral-400 transition-all duration-300"
+                    />
+                  </label>
                 </div>
 
                 <motion.button
@@ -1678,7 +1632,7 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {isModalLoading ? 'Submitting...' : 'Submit for Analysis'}
+                  {isModalLoading ? 'Submitting...' : 'Get AI Feedback'}
                 </motion.button>
               </form>
             </div>
@@ -1701,8 +1655,7 @@ export default function Home() {
       {/* Enhanced CTA Section */}
       <CTASection />
 
-      {/* Footer */}
-      <Footer setShowSampleCritique={setShowSampleCritique} />
+      {/* Footer is included globally via layout */}
 
       {/* Unified Modal */}
       <SuccessModal

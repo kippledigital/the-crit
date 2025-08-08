@@ -2,6 +2,83 @@ import { EducationalContentCard, EducationalPageTemplate } from '@/types/educati
 
 export const EDUCATIONAL_CONTENT_CARDS: EducationalContentCard[] = [
   {
+    title: "Portfolio Critique Checklist",
+    description: "Comprehensive interactive checklist to evaluate and improve your design portfolio. Based on feedback from 10,000+ designers and hiring managers.",
+    slug: "portfolio-critique-checklist",
+    category: "Portfolio Development",
+    searchVolume: 15000, // Reddit-identified high demand
+    readingTime: 5,
+    difficulty: "Beginner",
+    tags: ["portfolio critique", "portfolio checklist", "UX portfolio", "design portfolio", "portfolio feedback", "career development"],
+    publishedDate: "2025-01-20"
+  },
+  {
+    title: "Portfolio Examples Gallery",
+    description: "A curated gallery of portfolio examples with before/after critiques and actionable improvements.",
+    slug: "portfolio-examples-gallery",
+    category: "Portfolio Development",
+    searchVolume: 16000,
+    readingTime: 10,
+    difficulty: "Beginner",
+    tags: ["portfolio examples", "before after", "portfolio critique", "case studies"],
+    publishedDate: "2025-01-22"
+  },
+  {
+    title: "UX Career Transition Framework",
+    description: "A practical framework for transitioning into UX design: skills, projects, portfolio, and job search.",
+    slug: "ux-career-transition-framework",
+    category: "Career & Jobs",
+    searchVolume: 22000,
+    readingTime: 18,
+    difficulty: "Beginner",
+    tags: ["ux career", "career transition", "beginner", "portfolio", "job search"],
+    publishedDate: "2025-01-22"
+  },
+  {
+    title: "UX Designer Portfolio for Beginners",
+    description: "Complete step-by-step guide to create a professional UX designer portfolio from scratch. Learn portfolio structure, case study writing, and career preparation.",
+    slug: "ux-designer-portfolio-for-beginners",
+    category: "Portfolio Development",
+    searchVolume: 25000, // Reddit-identified high demand
+    readingTime: 20,
+    difficulty: "Beginner",
+    tags: ["UX portfolio", "UX designer portfolio", "portfolio guide", "case study writing", "career preparation", "UX career"],
+    publishedDate: "2025-01-21"
+  },
+  {
+    title: "Figma vs Adobe XD: Complete Comparison",
+    description: "Feature-by-feature comparison of Figma vs Adobe XD. Interactive matrix to help you choose the best design tool for your portfolio and workflow.",
+    slug: "figma-vs-adobe-xd",
+    category: "Tool Comparison",
+    searchVolume: 18000, // Reddit-identified high demand
+    readingTime: 12,
+    difficulty: "Beginner",
+    tags: ["figma vs adobe xd", "design tools", "tool comparison", "figma", "adobe xd", "UX tools", "design software"],
+    publishedDate: "2025-01-21"
+  },
+  {
+    title: "How to Give Actionable Design Feedback",
+    description: "Research-backed guide to giving effective design feedback. Learn methodology, frameworks, and best practices used by top design teams.",
+    slug: "design-feedback-best-practices",
+    category: "Feedback & Community",
+    searchVolume: 12000, // Reddit-identified high demand
+    readingTime: 15,
+    difficulty: "Intermediate",
+    tags: ["design feedback", "design critique", "feedback best practices", "design review", "actionable feedback", "design methodology"],
+    publishedDate: "2025-01-21"
+  },
+  {
+    title: "UX Designer Portfolio for Beginners",
+    description: "Complete step-by-step guide to create a professional UX designer portfolio from scratch. Learn portfolio structure, case study writing, and career preparation.",
+    slug: "ux-designer-portfolio-for-beginners",
+    category: "Portfolio Development",
+    searchVolume: 25000, // Reddit-identified high demand
+    readingTime: 20,
+    difficulty: "Beginner",
+    tags: ["UX portfolio", "UX designer portfolio", "portfolio guide", "case study writing", "career preparation", "UX career"],
+    publishedDate: "2025-01-21"
+  },
+  {
     title: "Design Principles for Beginners",
     description: "Master the fundamental principles that every designer needs to know, from balance and contrast to emphasis and unity.",
     slug: "design-principles-for-beginners",
@@ -2060,6 +2137,649 @@ export const DESIGN_PRINCIPLES_CONTENT: EducationalPageTemplate = {
       { text: "Get design feedback", href: "/" },
       { text: "Color theory guide", href: "/resources/how-to-use-color-wheel" },
       { text: "Design mistakes", href: "/resources/design-mistakes" }
+    ]
+  }
+}
+
+export const UX_PORTFOLIO_BEGINNERS_CONTENT: EducationalPageTemplate = {
+  metadata: {
+    title: "UX Designer Portfolio for Beginners - Complete Guide | The Crit",
+    description: "Step-by-step guide to create a professional UX designer portfolio from scratch. Learn portfolio structure, case study writing, and career preparation for beginners.",
+    keywords: [
+      "UX designer portfolio for beginners",
+      "UX portfolio guide",
+      "UX case study examples",
+      "UX designer portfolio tips",
+      "UX portfolio structure",
+      "UX designer career guide",
+      "UX portfolio for beginners",
+      "UX case study writing"
+    ],
+    searchVolume: 25000, // Reddit-identified high demand
+    difficulty: 35,
+    slug: "ux-designer-portfolio-for-beginners",
+    category: "Portfolio Development",
+    targetAudience: ["UX beginners", "career transitioners", "portfolio builders", "design students"],
+    readingTime: 20,
+    publishedDate: "2025-01-21",
+    lastUpdated: "2025-01-21"
+  },
+  heroSection: {
+    title: "UX Designer Portfolio for Beginners",
+    subtitle: "🎯 Complete Career Guide",
+    description: "Create a professional UX designer portfolio from scratch. Learn portfolio structure, case study writing, and career preparation for beginners transitioning into UX design.",
+    breadcrumbs: ["Resources", "Portfolio Development", "UX Designer Portfolio"]
+  },
+  tableOfContents: [
+    { id: "introduction", title: "Why Your UX Portfolio Matters", level: 1 },
+    { id: "portfolio-structure", title: "Portfolio Structure & Organization", level: 1 },
+    { id: "case-study-writing", title: "Writing Effective Case Studies", level: 1 },
+    { id: "project-selection", title: "Selecting Your Best Projects", level: 1 },
+    { id: "visual-presentation", title: "Visual Presentation & Design", level: 1 },
+    { id: "career-preparation", title: "Career Preparation & Job Readiness", level: 1 },
+    { id: "common-mistakes", title: "Common Portfolio Mistakes to Avoid", level: 1 },
+    { id: "portfolio-examples", title: "Portfolio Examples & Inspiration", level: 1 },
+    { id: "next-steps", title: "Next Steps & Career Growth", level: 1 }
+  ],
+  content: {
+    introduction: "Creating a UX designer portfolio can feel overwhelming, especially when you're just starting out. But with the right approach, you can build a portfolio that showcases your skills and opens doors to exciting opportunities. This comprehensive guide will walk you through every step of creating a professional UX portfolio, from structure and case studies to career preparation and common pitfalls to avoid.",
+    sections: [
+      {
+        id: "portfolio-structure",
+        title: "Portfolio Structure & Organization",
+        type: "text",
+        content: `
+          <h3>Essential Portfolio Sections</h3>
+          <p>Your UX portfolio should include these key sections:</p>
+          <ul>
+            <li><strong>Hero Section:</strong> Clear value proposition and professional photo</li>
+            <li><strong>About Me:</strong> Your story, skills, and career goals</li>
+            <li><strong>Case Studies:</strong> 3-5 detailed project showcases</li>
+            <li><strong>Skills & Tools:</strong> Technical and soft skills</li>
+            <li><strong>Contact Information:</strong> Easy ways to reach you</li>
+          </ul>
+          
+          <h3>Navigation Best Practices</h3>
+          <p>Make your portfolio easy to navigate:</p>
+          <ul>
+            <li>Clear, intuitive menu structure</li>
+            <li>Logical information hierarchy</li>
+            <li>Fast loading times</li>
+            <li>Mobile-responsive design</li>
+          </ul>
+        `
+      },
+      {
+        id: "case-study-writing",
+        title: "Writing Effective Case Studies",
+        type: "text",
+        content: `
+          <h3>Case Study Structure</h3>
+          <p>Each case study should follow this structure:</p>
+          <ol>
+            <li><strong>Project Overview:</strong> Brief description and your role</li>
+            <li><strong>Problem Statement:</strong> Clear definition of the challenge</li>
+            <li><strong>Research & Discovery:</strong> User research and insights</li>
+            <li><strong>Design Process:</strong> Your approach and methodology</li>
+            <li><strong>Solution:</strong> Final design and implementation</li>
+            <li><strong>Results & Impact:</strong> Measurable outcomes</li>
+          </ol>
+          
+          <h3>Writing Tips</h3>
+          <ul>
+            <li>Tell a compelling story</li>
+            <li>Show your thinking process</li>
+            <li>Include before/after examples</li>
+            <li>Quantify results when possible</li>
+            <li>Keep it concise but thorough</li>
+          </ul>
+        `
+      },
+      {
+        id: "project-selection",
+        title: "Selecting Your Best Projects",
+        type: "text",
+        content: `
+          <h3>Project Selection Criteria</h3>
+          <p>Choose projects that demonstrate:</p>
+          <ul>
+            <li><strong>Problem-Solving:</strong> Complex challenges you solved</li>
+            <li><strong>User-Centered Design:</strong> Research-driven decisions</li>
+            <li><strong>Technical Skills:</strong> Tools and methodologies used</li>
+            <li><strong>Impact:</strong> Measurable improvements</li>
+            <li><strong>Diversity:</strong> Different types of projects</li>
+          </ul>
+          
+          <h3>Project Types to Include</h3>
+          <ul>
+            <li>Web application redesigns</li>
+            <li>Mobile app concepts</li>
+            <li>User research studies</li>
+            <li>Information architecture projects</li>
+            <li>Design system work</li>
+          </ul>
+        `
+      },
+      {
+        id: "visual-presentation",
+        title: "Visual Presentation & Design",
+        type: "text",
+        content: `
+          <h3>Design Principles for Portfolios</h3>
+          <ul>
+            <li><strong>Clean Layout:</strong> Minimal, focused design</li>
+            <li><strong>Consistent Typography:</strong> Readable, professional fonts</li>
+            <li><strong>Color Harmony:</strong> Cohesive color palette</li>
+            <li><strong>Visual Hierarchy:</strong> Clear information structure</li>
+            <li><strong>Whitespace:</strong> Proper breathing room</li>
+          </ul>
+          
+          <h3>Image Quality Standards</h3>
+          <ul>
+            <li>High-resolution screenshots</li>
+            <li>Consistent image sizes</li>
+            <li>Professional mockups</li>
+            <li>Clear project visuals</li>
+            <li>Optimized for web</li>
+          </ul>
+        `
+      },
+      {
+        id: "career-preparation",
+        title: "Career Preparation & Job Readiness",
+        type: "text",
+        content: `
+          <h3>Portfolio for Job Applications</h3>
+          <ul>
+            <li>Tailor case studies to job requirements</li>
+            <li>Highlight relevant skills and experience</li>
+            <li>Include downloadable resume</li>
+            <li>Add professional contact information</li>
+            <li>Test portfolio with industry professionals</li>
+          </ul>
+          
+          <h3>Career Development Tips</h3>
+          <ul>
+            <li>Network with other UX designers</li>
+            <li>Seek feedback on your portfolio</li>
+            <li>Stay updated with industry trends</li>
+            <li>Continuously improve your work</li>
+            <li>Build a personal brand</li>
+          </ul>
+        `
+      },
+      {
+        id: "common-mistakes",
+        title: "Common Portfolio Mistakes to Avoid",
+        type: "text",
+        content: `
+          <h3>Content Mistakes</h3>
+          <ul>
+            <li>Incomplete case studies</li>
+            <li>Missing problem statements</li>
+            <li>No user research documentation</li>
+            <li>Poor writing and grammar</li>
+            <li>Outdated projects</li>
+          </ul>
+          
+          <h3>Design Mistakes</h3>
+          <ul>
+            <li>Inconsistent visual design</li>
+            <li>Poor mobile experience</li>
+            <li>Slow loading times</li>
+            <li>Unclear navigation</li>
+            <li>Low-quality images</li>
+          </ul>
+        `
+      },
+      {
+        id: "portfolio-examples",
+        title: "Portfolio Examples & Inspiration",
+        type: "text",
+        content: `
+          <h3>What Makes Great Portfolios</h3>
+          <ul>
+            <li>Clear storytelling</li>
+            <li>Strong visual design</li>
+            <li>Comprehensive case studies</li>
+            <li>Professional presentation</li>
+            <li>User-centered approach</li>
+          </ul>
+          
+          <h3>Portfolio Platforms</h3>
+          <ul>
+            <li>Personal website (recommended)</li>
+            <li>Behance for project showcases</li>
+            <li>Dribbble for visual inspiration</li>
+            <li>LinkedIn for professional networking</li>
+            <li>GitHub for technical projects</li>
+          </ul>
+        `
+      },
+      {
+        id: "next-steps",
+        title: "Next Steps & Career Growth",
+        type: "text",
+        content: `
+          <h3>Continuous Improvement</h3>
+          <ul>
+            <li>Regularly update your portfolio</li>
+            <li>Add new projects and skills</li>
+            <li>Seek feedback from mentors</li>
+            <li>Stay current with UX trends</li>
+            <li>Build a strong online presence</li>
+          </ul>
+          
+          <h3>Career Advancement</h3>
+          <ul>
+            <li>Apply for UX positions</li>
+            <li>Network with industry professionals</li>
+            <li>Attend UX conferences and events</li>
+            <li>Join UX communities and forums</li>
+            <li>Consider UX certification programs</li>
+          </ul>
+        `
+      }
+    ],
+    interactiveElements: [],
+    callToAction: {
+      title: "Ready to Get Professional Feedback?",
+      description: "Get AI-powered portfolio feedback and personalized recommendations to improve your UX designer portfolio.",
+      primaryCTA: {
+        text: "Get Portfolio Feedback",
+        href: "/feedback",
+        type: "internal"
+      },
+      secondaryCTA: {
+        text: "View Portfolio Examples",
+        href: "/resources/portfolio-examples",
+        type: "internal"
+      }
+    },
+    relatedContent: [
+      {
+        title: "Portfolio Critique Checklist",
+        slug: "portfolio-critique-checklist",
+        description: "Interactive checklist to evaluate your portfolio",
+        readingTime: 5
+      },
+      {
+        title: "Design Principles for Beginners",
+        slug: "design-principles-for-beginners",
+        description: "Master the fundamentals of design",
+        readingTime: 12
+      }
+    ]
+  },
+  seo: {
+    canonicalUrl: "https://thecrit.com/resources/ux-designer-portfolio-for-beginners",
+    ogImage: "/images/ux-portfolio-guide.jpg",
+    schemaMarkup: {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "UX Designer Portfolio for Beginners",
+      "description": "Complete guide to create a professional UX designer portfolio from scratch",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Portfolio Structure",
+          "text": "Learn essential portfolio sections and organization"
+        },
+        {
+          "@type": "HowToStep", 
+          "name": "Case Study Writing",
+          "text": "Write effective case studies that showcase your work"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Career Preparation", 
+          "text": "Prepare your portfolio for job applications"
+        }
+      ]
+    },
+    internalLinks: [
+      {
+        text: "Portfolio Critique Checklist",
+        href: "/resources/portfolio-critique-checklist"
+      },
+      {
+        text: "Design Principles Guide",
+        href: "/resources/design-principles-for-beginners"
+      }
+    ]
+  }
+}
+
+export const DESIGN_FEEDBACK_BEST_PRACTICES_CONTENT: EducationalPageTemplate = {
+  metadata: {
+    title: "How to Give Actionable Design Feedback - Complete Guide | The Crit",
+    description: "Research-backed guide to giving effective design feedback. Learn methodology, frameworks, and best practices used by top design teams and hiring managers.",
+    keywords: [
+      "design feedback best practices",
+      "how to give design feedback",
+      "actionable design feedback",
+      "design critique methodology",
+      "design review process",
+      "effective design feedback",
+      "design feedback framework",
+      "design critique guide"
+    ],
+    searchVolume: 12000, // Reddit-identified high demand
+    difficulty: 30,
+    slug: "design-feedback-best-practices",
+    category: "Feedback & Community",
+    targetAudience: ["design managers", "senior designers", "design students", "team leads", "design educators"],
+    readingTime: 15,
+    publishedDate: "2025-01-21",
+    lastUpdated: "2025-01-21"
+  },
+  heroSection: {
+    title: "How to Give Actionable Design Feedback",
+    subtitle: "💬 Research-Backed Methodology",
+    description: "Learn the frameworks and best practices used by top design teams to give effective, actionable feedback that drives real improvement.",
+    breadcrumbs: ["Resources", "Feedback & Community", "Design Feedback Best Practices"]
+  },
+  tableOfContents: [
+    { id: "introduction", title: "Why Good Feedback Matters", level: 1 },
+    { id: "feedback-framework", title: "The IMPACT Feedback Framework", level: 1 },
+    { id: "observation-vs-interpretation", title: "Observation vs. Interpretation", level: 1 },
+    { id: "specific-actionable-feedback", title: "Making Feedback Specific & Actionable", level: 1 }
+  ],
+  content: {
+    introduction: "Effective design feedback is the cornerstone of great design work. Yet many designers struggle to give feedback that actually helps improve designs. This guide provides research-backed frameworks and methodologies used by top design teams to deliver feedback that drives real improvement and fosters growth.",
+    sections: [
+      {
+        id: "feedback-framework",
+        title: "The IMPACT Feedback Framework",
+        type: "text",
+        content: `
+          <h3>The IMPACT Method</h3>
+          <p>Use this structured approach for consistent, effective feedback:</p>
+          <ul>
+            <li><strong>I</strong>dentify the specific element or issue</li>
+            <li><strong>M</strong>ention the design principle or goal affected</li>
+            <li><strong>P</strong>oint out the current impact on users</li>
+            <li><strong>A</strong>dvise specific improvements</li>
+            <li><strong>C</strong>onnect to business or user goals</li>
+            <li><strong>T</strong>ie back to design principles or research</li>
+          </ul>
+          
+          <h3>Example IMPACT Feedback</h3>
+          <blockquote class="border-l-4 border-primary-500 pl-4 py-2 bg-primary-50 my-4">
+            <p><strong>Identify:</strong> "The primary CTA button in the hero section..."</p>
+            <p><strong>Mention:</strong> "...lacks sufficient contrast according to WCAG guidelines..."</p>
+            <p><strong>Point out:</strong> "...which may prevent users with visual impairments from seeing it clearly..."</p>
+            <p><strong>Advise:</strong> "...consider increasing the contrast ratio to at least 4.5:1 by darkening the background or lightening the text..."</p>
+            <p><strong>Connect:</strong> "...to improve accessibility and potentially increase conversion rates..."</p>
+            <p><strong>Tie back:</strong> "...aligning with our inclusive design principles and accessibility standards."</p>
+          </blockquote>
+        `
+      },
+      {
+        id: "observation-vs-interpretation",
+        title: "Observation vs. Interpretation",
+        type: "text",
+        content: `
+          <h3>Focus on What You See, Not What You Think</h3>
+          <p>Effective feedback separates observations from interpretations:</p>
+          
+          <h4>❌ Poor Feedback (Interpretation-Based)</h4>
+          <ul>
+            <li>"This design looks unprofessional"</li>
+            <li>"The layout is confusing"</li>
+            <li>"Users won't like this"</li>
+            <li>"This doesn't feel right"</li>
+          </ul>
+          
+          <h4>✅ Good Feedback (Observation-Based)</h4>
+          <ul>
+            <li>"The font hierarchy uses 4 different sizes within 2 points of each other"</li>
+            <li>"The navigation items align to different baselines"</li>
+            <li>"The form has 12 required fields on one screen"</li>
+            <li>"The color contrast ratio is 2.1:1, below WCAG standards"</li>
+          </ul>
+          
+          <h3>The "I Notice" Technique</h3>
+          <p>Start feedback with "I notice..." to focus on observations:</p>
+          <ul>
+            <li>"I notice the call-to-action button uses the same color as the error states"</li>
+            <li>"I notice the text size drops below 14px in several sections"</li>
+            <li>"I notice there's no clear visual hierarchy between primary and secondary actions"</li>
+          </ul>
+        `
+      },
+      {
+        id: "specific-actionable-feedback",
+        title: "Making Feedback Specific & Actionable",
+        type: "text",
+        content: `
+          <h3>The Specificity Spectrum</h3>
+          <p>Move from vague to specific feedback:</p>
+          
+          <div class="overflow-x-auto my-6">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-sm font-medium text-gray-900">Vague</th>
+                  <th class="px-4 py-3 text-left text-sm font-medium text-gray-900">Better</th>
+                  <th class="px-4 py-3 text-left text-sm font-medium text-gray-900">Specific & Actionable</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr>
+                  <td class="px-4 py-3 text-sm text-gray-600">"Fix the spacing"</td>
+                  <td class="px-4 py-3 text-sm text-gray-600">"The spacing looks inconsistent"</td>
+                  <td class="px-4 py-3 text-sm text-gray-900">"Use 16px spacing between sections and 8px between related elements for consistent rhythm"</td>
+                </tr>
+                <tr class="bg-gray-50">
+                  <td class="px-4 py-3 text-sm text-gray-600">"Make it pop"</td>
+                  <td class="px-4 py-3 text-sm text-gray-600">"It needs more contrast"</td>
+                  <td class="px-4 py-3 text-sm text-gray-900">"Increase the button contrast to 4.5:1 and add a 2px border to meet accessibility standards"</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 text-sm text-gray-600">"Users won't get it"</td>
+                  <td class="px-4 py-3 text-sm text-gray-600">"The navigation is unclear"</td>
+                  <td class="px-4 py-3 text-sm text-gray-900">"Consider using standard navigation patterns like left-aligned menu items and breadcrumbs"</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <h3>Action-Oriented Language</h3>
+          <p>Use verbs that suggest specific actions:</p>
+          <ul>
+            <li><strong>Consider:</strong> "Consider increasing the line height to 1.5 for better readability"</li>
+            <li><strong>Try:</strong> "Try using a card layout to group related information"</li>
+            <li><strong>Explore:</strong> "Explore using progressive disclosure for the advanced settings"</li>
+            <li><strong>Test:</strong> "Test this layout with users who have motor impairments"</li>
+          </ul>
+        `
+      }
+    ],
+    interactiveElements: [],
+    callToAction: {
+      title: "Ready to Give Better Design Feedback?",
+      description: "Use The Crit's AI-powered feedback system to practice giving structured, actionable design critiques.",
+      primaryCTA: {
+        text: "Try AI Feedback Tool",
+        href: "/feedback",
+        type: "internal"
+      },
+      secondaryCTA: {
+        text: "View Feedback Examples",
+        href: "/resources/portfolio-critique-checklist",
+        type: "internal"
+      }
+    },
+    relatedContent: [
+      {
+        title: "Portfolio Critique Checklist",
+        slug: "portfolio-critique-checklist",
+        description: "Interactive checklist for evaluating design portfolios",
+        readingTime: 5
+      },
+      {
+        title: "Design Principles for Beginners",
+        slug: "design-principles-for-beginners",
+        description: "Master the fundamentals of design",
+        readingTime: 12
+      }
+    ]
+  },
+  seo: {
+    canonicalUrl: "https://thecrit.com/resources/design-feedback-best-practices",
+    ogImage: "/images/design-feedback-guide.jpg",
+    schemaMarkup: {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "How to Give Actionable Design Feedback",
+      "description": "Research-backed guide to giving effective design feedback with frameworks and best practices",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Use the IMPACT Framework",
+          "text": "Structure feedback with Identify, Mention, Point out, Advise, Connect, and Tie back"
+        },
+        {
+          "@type": "HowToStep", 
+          "name": "Focus on Observations",
+          "text": "Separate what you see from what you interpret"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Make Feedback Actionable", 
+          "text": "Provide specific, actionable suggestions rather than vague opinions"
+        }
+      ]
+    },
+    internalLinks: [
+      {
+        text: "Portfolio Critique Checklist",
+        href: "/resources/portfolio-critique-checklist"
+      },
+      {
+        text: "Design Principles Guide",
+        href: "/resources/design-principles-for-beginners"
+      }
+    ]
+  }
+}
+
+// APPENDED: Portfolio Examples Gallery content template
+export const PORTFOLIO_EXAMPLES_GALLERY_CONTENT: EducationalPageTemplate = {
+  metadata: {
+    title: "Portfolio Examples Gallery - Before/After Critiques | The Crit",
+    description: "A curated gallery of portfolio examples with before/after critiques and actionable improvements.",
+    keywords: [
+      "portfolio examples",
+      "portfolio critique examples",
+      "before after design portfolio",
+      "portfolio improvement"
+    ],
+    searchVolume: 16000,
+    difficulty: 25,
+    slug: "portfolio-examples-gallery",
+    category: "Portfolio Development",
+    targetAudience: ["students", "junior designers", "career transitioners"],
+    readingTime: 10,
+    publishedDate: "2025-01-22",
+    lastUpdated: "2025-01-22"
+  },
+  heroSection: {
+    title: "Portfolio Examples Gallery",
+    subtitle: "Before/After Critiques",
+    description: "Real examples of portfolio improvements with specific, actionable changes.",
+    breadcrumbs: ["Resources", "Portfolio Development", "Portfolio Examples Gallery"]
+  },
+  tableOfContents: [
+    { id: "intro", title: "How to Use This Gallery", level: 1 },
+    { id: "structure", title: "Portfolio Structure Examples", level: 1 },
+    { id: "case-studies", title: "Case Study Examples", level: 1 }
+  ],
+  content: {
+    introduction: "Browse before/after examples of portfolio pages and case studies with specific improvements and rationale.",
+    sections: [
+      {
+        id: "intro",
+        title: "How to Use This Gallery",
+        type: "text",
+        content: `<p>Each example includes a before/after with the exact changes made and why they matter.</p>`
+      }
+    ],
+    interactiveElements: [],
+    callToAction: {
+      title: "Want Feedback on Your Portfolio?",
+      description: "Submit your portfolio for AI-powered suggestions and community review.",
+      primaryCTA: { text: "Get Portfolio Feedback", href: "/feedback", type: "internal" }
+    },
+    relatedContent: [
+      { title: "Portfolio Critique Checklist", slug: "portfolio-critique-checklist", description: "Evaluate your portfolio systematically", readingTime: 5 }
+    ]
+  },
+  seo: {
+    canonicalUrl: "https://thecrit.com/resources/portfolio-examples-gallery",
+    schemaMarkup: { "@context": "https://schema.org", "@type": "Collection" },
+    internalLinks: [
+      { text: "Portfolio Critique Checklist", href: "/resources/portfolio-critique-checklist" }
+    ]
+  }
+}
+
+// APPENDED: UX Career Transition Framework content template
+export const UX_CAREER_TRANSITION_FRAMEWORK_CONTENT: EducationalPageTemplate = {
+  metadata: {
+    title: "UX Career Transition Framework - Step-by-Step Guide | The Crit",
+    description: "A practical framework for transitioning into UX design: skills, projects, portfolio, and job search.",
+    keywords: [
+      "ux career transition",
+      "switch to ux",
+      "ux beginner roadmap",
+      "ux career guide"
+    ],
+    searchVolume: 22000,
+    difficulty: 30,
+    slug: "ux-career-transition-framework",
+    category: "Career & Jobs",
+    targetAudience: ["career transitioners", "self-taught designers", "bootcamp grads"],
+    readingTime: 18,
+    publishedDate: "2025-01-22",
+    lastUpdated: "2025-01-22"
+  },
+  heroSection: {
+    title: "UX Career Transition Framework",
+    subtitle: "Step-by-Step Roadmap",
+    description: "Everything you need to move into UX: skills to learn, projects to build, and how to land interviews.",
+    breadcrumbs: ["Resources", "Career & Jobs", "UX Career Transition Framework"]
+  },
+  tableOfContents: [
+    { id: "skills", title: "Skills to Learn", level: 1 },
+    { id: "projects", title: "Projects to Build", level: 1 },
+    { id: "portfolio", title: "Portfolio Strategy", level: 1 },
+    { id: "interviews", title: "Job Search & Interviews", level: 1 }
+  ],
+  content: {
+    introduction: "Transitioning into UX is achievable with a clear plan. Follow this framework to build skills, create strong projects, and present an effective portfolio.",
+    sections: [
+      { id: "skills", title: "Skills to Learn", type: "text", content: "<ul><li>Research fundamentals</li><li>Interaction design</li><li>Visual design basics</li><li>Prototyping tools</li></ul>" },
+      { id: "projects", title: "Projects to Build", type: "text", content: "<p>Build 3 projects: onboarding flow, e-commerce checkout, accessibility redesign.</p>" },
+      { id: "portfolio", title: "Portfolio Strategy", type: "text", content: "<p>Craft 3 detailed case studies with context, process, and outcomes.</p>" },
+      { id: "interviews", title: "Job Search & Interviews", type: "text", content: "<p>Outreach plan, application targeting, and whiteboard exercise practice.</p>" }
+    ],
+    interactiveElements: [],
+    callToAction: {
+      title: "Start Your Transition",
+      description: "Use The Crit to get feedback on your projects and portfolio as you transition.",
+      primaryCTA: { text: "Get Feedback", href: "/feedback", type: "internal" }
+    },
+    relatedContent: [
+      { title: "UX Designer Portfolio for Beginners", slug: "ux-designer-portfolio-for-beginners", description: "Build a strong beginner portfolio", readingTime: 20 }
+    ]
+  },
+  seo: {
+    canonicalUrl: "https://thecrit.com/resources/ux-career-transition-framework",
+    schemaMarkup: { "@context": "https://schema.org", "@type": "Guide" },
+    internalLinks: [
+      { text: "Beginner Portfolio Guide", href: "/resources/ux-designer-portfolio-for-beginners" }
     ]
   }
 }

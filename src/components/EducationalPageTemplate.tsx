@@ -5,7 +5,7 @@ import { motion, useInView } from 'framer-motion'
 import { ArrowLeft, Clock, Users, BookOpen, ExternalLink, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { EducationalPageTemplate as EducationalPageTemplateType } from '@/types/educational-content'
-import { ColorWheel, GoldenRatioCalculator, ContrastChecker, EducationalImage } from '@/components'
+import { ColorWheel, GoldenRatioCalculator, ContrastChecker, EducationalImage, Breadcrumbs } from '@/components'
 
 interface EducationalPageProps {
   data: EducationalPageTemplateType
@@ -238,32 +238,20 @@ export default function EducationalPageTemplate({ data }: EducationalPageProps) 
   const heroRef = useRef(null)
   const heroInView = useInView(heroRef, { once: true })
 
+  // Build breadcrumb items from data
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Resources', href: '/resources' },
+    ...data.heroSection.breadcrumbs.slice(1).map((crumb, index, arr) => ({
+      label: crumb,
+      href: index === arr.length - 1 ? undefined : `/resources/${data.metadata.slug}`,
+      active: index === arr.length - 1
+    }))
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-primary-50/20">
-      {/* Header Breadcrumbs */}
-      <div className="bg-white border-b border-neutral-200">
-        <div className="container mx-auto px-4 py-4">
-          <nav className="flex items-center space-x-2 text-sm font-ui">
-            <Link href="/" className="text-neutral-600 hover:text-primary-600 transition-colors">
-              Home
-            </Link>
-            {data.heroSection.breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={index}>
-                <ChevronRight className="w-4 h-4 text-neutral-400" />
-                {index === 0 ? (
-                  <Link href="/resources" className="text-neutral-600 hover:text-primary-600 transition-colors">
-                    {crumb}
-                  </Link>
-                ) : (
-                  <span className={index === data.heroSection.breadcrumbs.length - 1 ? "text-primary-600 font-medium" : "text-neutral-600"}>
-                    {crumb}
-                  </span>
-                )}
-              </React.Fragment>
-            ))}
-          </nav>
-        </div>
-      </div>
+      <Breadcrumbs items={breadcrumbItems} />
 
       {/* Hero Section */}
       <section ref={heroRef} className="py-16 bg-gradient-to-br from-primary-50 to-secondary-50/30 relative overflow-hidden">
@@ -434,6 +422,7 @@ export default function EducationalPageTemplate({ data }: EducationalPageProps) 
           </div>
         </div>
       </section>
+      
     </div>
   )
 }

@@ -42,10 +42,6 @@ const tools = [
 const server = new Server({
     name: "the-crit-mcp-server",
     version: "1.0.0",
-}, {
-    capabilities: {
-        tools: {},
-    },
 });
 // Handle list tools requests
 server.setRequestHandler(ListToolsRequestSchema, async () => {

@@ -6,7 +6,6 @@ import { Clock, Users, Search, Filter, ArrowRight, BookOpen, Lightbulb, Palette,
 import Link from 'next/link'
 import { EDUCATIONAL_CONTENT_CARDS } from '@/data/educational-content'
 import { EducationalContentCard } from '@/types/educational-content'
-import { ColorWheel, GoldenRatioCalculator, ContrastChecker } from '@/components'
 
 const CATEGORIES = ['All', 'Fundamentals', 'Color Theory', 'Tutorials', 'Problem Solving', 'Education']
 const DIFFICULTIES = ['All', 'Beginner', 'Intermediate', 'Advanced']
@@ -271,7 +270,6 @@ export default function ResourcesPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState('All')
   const [sortBy, setSortBy] = useState<SortOption>('Newest')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
-  const [activeTab, setActiveTab] = useState<'Guides' | 'Tools'>('Guides')
 
   useEffect(() => {
     try {
@@ -317,11 +315,6 @@ export default function ResourcesPage() {
   const trendingCards = [...EDUCATIONAL_CONTENT_CARDS]
     .sort((a, b) => b.searchVolume - a.searchVolume)
     .slice(0, 3)
-
-  const categoryCounts = CATEGORIES.filter(c => c !== 'All').map((category) => ({
-    category,
-    count: EDUCATIONAL_CONTENT_CARDS.filter(c => c.category === category).length
-  }))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-primary-50/10">
@@ -406,169 +399,91 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      {/* Tabs + Search and Filters */}
+      {/* Search and Filters */}
       <section className="py-12 bg-white border-t border-neutral-100">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* Tabs */}
-            <div className="flex items-center justify-center gap-2">
-              {(['Guides', 'Tools'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-lg font-ui text-sm transition-all duration-200 border ${
-                    activeTab === tab ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary-400'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            {/* Search */}
+            <div className="max-w-2xl mx-auto">
+              <SearchBar 
+                searchTerm={searchTerm} 
+                onSearchChange={setSearchTerm}
+                onSearchSubmit={(term) => saveRecentSearch(term)}
+              />
+              <div className="mt-3">
+                <RecentSearches
+                  items={recentSearches}
+                  onSelect={(term) => setSearchTerm(term)}
+                  onClear={() => { setRecentSearches([]); try { localStorage.removeItem('recentSearches') } catch {} }}
+                />
+              </div>
             </div>
 
-            {activeTab === 'Guides' && (
-              <>
-                {/* Search */}
-                <div className="max-w-2xl mx-auto">
-                  <SearchBar 
-                    searchTerm={searchTerm} 
-                    onSearchChange={setSearchTerm}
-                    onSearchSubmit={(term) => saveRecentSearch(term)}
-                  />
-                  <div className="mt-3">
-                    <RecentSearches
-                      items={recentSearches}
-                      onSelect={(term) => setSearchTerm(term)}
-                      onClear={() => { setRecentSearches([]); try { localStorage.removeItem('recentSearches') } catch {} }}
-                    />
-                  </div>
-                </div>
-
-                {/* Filters */}
-                <FilterBar
-                  selectedCategory={selectedCategory}
-                  selectedDifficulty={selectedDifficulty}
-                  onCategoryChange={setSelectedCategory}
-                  onDifficultyChange={setSelectedDifficulty}
-                />
-
-                {/* Collections (by category) */}
-                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-neutral-600 font-ui text-sm">Collections:</span>
-                    {categoryCounts.map(({ category, count }) => (
-                      <button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
-                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm border transition-all ${
-                          selectedCategory === category
-                            ? 'bg-primary-50 text-primary-700 border-primary-200'
-                            : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary-300'
-                        }`}
-                      >
-                        <Tag className="w-3 h-3" />
-                        {category}
-                        <span className="text-neutral-500">({count})</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+            {/* Filters */}
+            <FilterBar
+              selectedCategory={selectedCategory}
+              selectedDifficulty={selectedDifficulty}
+              onCategoryChange={setSelectedCategory}
+              onDifficultyChange={setSelectedDifficulty}
+            />
           </div>
         </div>
       </section>
 
-      {/* Content Grid / Tools */}
+      {/* Content Grid */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
-            {activeTab === 'Guides' ? (
-              <>
-                {/* Results Info */}
-                <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <p className="font-ui text-neutral-600">
-                    Showing {sortedCards.length} {sortedCards.length === 1 ? 'result' : 'results'}
-                    {searchTerm && ` for "${searchTerm}"`}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="sort" className="font-ui text-sm text-neutral-600">Sort by</label>
-                    <select
-                      id="sort"
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as SortOption)}
-                      className="font-ui text-sm border border-neutral-300 rounded-md px-3 py-2 bg-white hover:border-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option>Newest</option>
-                      <option>Popular</option>
-                      <option>A-Z</option>
-                      <option>Reading time (short)</option>
-                      <option>Reading time (long)</option>
-                    </select>
-                  </div>
-                </div>
+            {/* Results Info */}
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p className="font-ui text-neutral-600">
+                Showing {sortedCards.length} {sortedCards.length === 1 ? 'result' : 'results'}
+                {searchTerm && ` for "${searchTerm}"`}
+              </p>
+              <div className="flex items-center gap-2">
+                <label htmlFor="sort" className="font-ui text-sm text-neutral-600">Sort by</label>
+                <select
+                  id="sort"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="font-ui text-sm border border-neutral-300 rounded-md px-3 py-2 bg-white hover:border-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option>Newest</option>
+                  <option>Popular</option>
+                  <option>A-Z</option>
+                  <option>Reading time (short)</option>
+                  <option>Reading time (long)</option>
+                </select>
+              </div>
+            </div>
 
-                {/* Cards Grid */}
-                {filteredCards.length > 0 ? (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {sortedCards.map((card, index) => (
-                      <ContentCard key={card.slug} card={card} index={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-20">
-                    <div className="max-w-md mx-auto">
-                      <Search className="w-16 h-16 text-neutral-300 mx-auto mb-6" />
-                      <h3 className="font-display text-2xl font-bold text-neutral-900 mb-4">
-                        No results found
-                      </h3>
-                      <p className="font-ui text-neutral-600 mb-8">
-                        Try adjusting your search terms or filters to find what you're looking for.
-                      </p>
-                      <button
-                        onClick={() => {
-                          setSearchTerm('')
-                          setSelectedCategory('All')
-                          setSelectedDifficulty('All')
-                        }}
-                        className="bg-primary-500 hover:bg-primary-600 text-white font-ui font-semibold px-6 py-3 rounded-lg transition-colors duration-200"
-                      >
-                        Clear All Filters
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
+            {/* Cards Grid */}
+            {filteredCards.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {sortedCards.map((card, index) => (
+                  <ContentCard key={card.slug} card={card} index={index} />
+                ))}
+              </div>
             ) : (
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl border border-neutral-200 p-6">
-                  <h3 className="font-display text-xl font-bold text-neutral-900 mb-2">Interactive Color Wheel</h3>
-                  <p className="font-ui text-neutral-600 mb-4">Explore color relationships and build harmonious palettes.</p>
-                  <div className="flex justify-center"><ColorWheel size={220} onColorChange={() => {}} /></div>
-                  <div className="mt-4 text-right">
-                    <Link href="/resources/how-to-use-color-wheel" className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-ui font-medium">
-                      Learn color theory <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-                <div className="bg-white rounded-2xl border border-neutral-200 p-6">
-                  <h3 className="font-display text-xl font-bold text-neutral-900 mb-2">Golden Ratio Calculator</h3>
-                  <p className="font-ui text-neutral-600 mb-4">Generate pleasing layout proportions instantly.</p>
-                  <GoldenRatioCalculator className="w-full" />
-                  <div className="mt-4 text-right">
-                    <Link href="/resources/design-principles-for-beginners" className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-ui font-medium">
-                      Learn layout principles <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-                <div className="bg-white rounded-2xl border border-neutral-200 p-6 md:col-span-2">
-                  <h3 className="font-display text-xl font-bold text-neutral-900 mb-2">Contrast Checker</h3>
-                  <p className="font-ui text-neutral-600 mb-4">Test color pairs for WCAG accessibility compliance.</p>
-                  <ContrastChecker className="w-full" />
-                  <div className="mt-4 text-right">
-                    <Link href="/resources/design-mistakes" className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-ui font-medium">
-                      Avoid color mistakes <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
+              <div className="text-center py-20">
+                <div className="max-w-md mx-auto">
+                  <Search className="w-16 h-16 text-neutral-300 mx-auto mb-6" />
+                  <h3 className="font-display text-2xl font-bold text-neutral-900 mb-4">
+                    No results found
+                  </h3>
+                  <p className="font-ui text-neutral-600 mb-8">
+                    Try adjusting your search terms or filters to find what you're looking for.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSearchTerm('')
+                      setSelectedCategory('All')
+                      setSelectedDifficulty('All')
+                    }}
+                    className="bg-primary-500 hover:bg-primary-600 text-white font-ui font-semibold px-6 py-3 rounded-lg transition-colors duration-200"
+                  >
+                    Clear All Filters
+                  </button>
                 </div>
               </div>
             )}

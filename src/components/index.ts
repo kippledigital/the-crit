@@ -1,1 +1,6 @@
-export { default as SuccessModal } from './SuccessModal' 
+export { default as SuccessModal } from './SuccessModal'
+export { default as ColorWheel } from './ColorWheel'
+export { default as EducationalPageTemplate } from './EducationalPageTemplate'
+export { default as GoldenRatioCalculator } from './GoldenRatioCalculator'
+export { default as ContrastChecker } from './ContrastChecker'
+export { default as EducationalImage } from './EducationalImage' 

@@ -1,0 +1,371 @@
+{
+    "name": "The Crit Machine - Full AI Agent Backend",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "crit-submission",
+          "responseMode": "responseNode"
+        },
+        "id": "webhook-trigger",
+        "name": "Crit Submission Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [200, 300]
+      },
+      {
+        "parameters": {
+          "functionCode": "// Process and validate incoming submission data\nconst body = $input.first().body;\n\nconst submission = {\n  project_title: body.project_title || '',\n  project_description: body.project_description || '',\n  project_link: body.project_link || '',\n  user_name: body.user_name || '',\n  goals: body.goals || '',\n  rubric: body.rubric || '',\n  specificFeedback: body.specificFeedback || '',\n  url: body.url || '',\n  files: body.files || [],\n  skill_level: body.skill_level || 'intermediate'\n};\n\nconst processed = {\n  ...submission,\n  submission_id: `crit_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,\n  received_at: new Date().toISOString(),\n  validation: {\n    has_content: submission.files.length > 0 || submission.url.length > 0,\n    has_context: submission.goals.length > 0 || submission.rubric.length > 0,\n    valid_submission: true\n  }\n};\n\nif (!processed.validation.has_content) {\n  processed.validation.valid_submission = false;\n  processed.validation.error = 'No files or URL provided';\n}\n\nreturn [{ json: processed }];"
+        },
+        "id": "process-submission",
+        "name": "Process Submission Data",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [400, 300]
+      },
+      {
+        "parameters": {
+          "functionCode": "// Smart routing based on submission content\nconst submission = $input.first().json;\n\nconst has_files = submission.files && submission.files.length > 0;\nconst has_url = submission.url && submission.url.trim().length > 0;\n\nlet processing_path = 'error';\n\nif (has_files && has_url) {\n  processing_path = 'hybrid';\n} else if (has_files) {\n  processing_path = 'files_only';\n} else if (has_url) {\n  processing_path = 'url_only';\n}\n\nconst routing_data = {\n  ...submission,\n  processing_path\n};\n\nreturn [{ json: routing_data }];"
+        },
+        "id": "smart-router",
+        "name": "Smart Submission Router",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [600, 300]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "conditions": [
+              {
+                "value1": "={{ $json.processing_path }}",
+                "operation": "equals",
+                "value2": "files_only"
+              },
+              {
+                "value1": "={{ $json.processing_path }}",
+                "operation": "equals",
+                "value2": "url_only"
+              },
+              {
+                "value1": "={{ $json.processing_path }}",
+                "operation": "equals",
+                "value2": "hybrid"
+              }
+            ]
+          }
+        },
+        "id": "processing-switch",
+        "name": "Processing Path Switch",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [800, 300]
+      }
+      ,
+      {
+        "parameters": {
+          "functionCode": "// Analyze uploaded files if present\nconst submission = $input.first().json;\n\nconst analyses = (submission.files || []).map(file => {\n  const filename = file.filename?.toLowerCase() || '';\n  const mimetype = file.mimetype?.toLowerCase() || '';\n  let type = 'unknown';\n  let content_type = 'general_design';\n  let suggested_agents = ['visual_design'];\n\n  if (mimetype.includes('image/')) {\n    type = 'image';\n    content_type = 'visual_ui';\n    suggested_agents.push('ux_ui', 'accessibility');\n  } else if (mimetype.includes('pdf')) {\n    type = 'pdf';\n    content_type = 'design_document';\n    suggested_agents.push('content_copy');\n  }\n\n  return {\n    filename: file.filename,\n    mimetype,\n    type,\n    content_type,\n    suggested_agents\n  };\n});\n\nreturn [{ json: { ...submission, file_analysis: analyses } }];"
+        },
+        "id": "enhanced-file-processor",
+        "name": "Enhanced File Processor",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [1000, 200]
+      },
+      {
+        "parameters": {
+          "url": "={{ $json.url }}",
+          "responseFormat": "string"
+        },
+        "id": "fetch-html",
+        "name": "Fetch URL HTML",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [1000, 400]
+      },
+      {
+        "parameters": {
+          "url": "https://chrome.browserless.io/screenshot",
+          "method": "POST",
+          "jsonParameters": true,
+          "options": {},
+          "bodyParametersJson": "{\n  \"url\": \"{{$json.url}}\",\n  \"fullPage\": true,\n  \"viewport\": {\n    \"width\": 1440,\n    \"height\": 1024\n  },\n  \"encoding\": \"base64\"\n}",
+          "responseFormat": "json"
+        },
+        "id": "browserless-screenshot",
+        "name": "Take Browserless Screenshot",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [1200, 400],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "YOUR-BROWSERLESS-CREDENTIAL-ID",
+            "name": "Your Browserless Credential"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "claude-3-opus",
+          "agentType": "zeroShotReactDescription",
+          "systemMessage": "=You are The Crit Machine, a professional design mentor and critique assistant. You analyze designs, images, websites, PDFs, and more. You use specialized tools to:\n- run accessibility checks\n- evaluate color contrast\n- check brand consistency\n- assess UX heuristics\n- analyze web performance.\n\nYour output must be JSON:\n{\n  \"critique\": \"string\",\n  \"recommendations\": [\"string\", ...],\n  \"scores\": {\n    \"visual_design\": number,\n    \"ux_ui\": number,\n    \"accessibility\": number,\n    \"performance\": number,\n    \"brand_consistency\": number\n  },\n  \"crit_sheet_markdown\": \"markdown content\",\n  \"screenshots\": [{ \"label\": \"...\", \"url\": \"...\" }]\n}\n\nInclude actionable, educational feedback in professional but encouraging tone. Use the provided context variables:\n- visual analysis results\n- screenshots\n- website technical data\n- PDF analysis results\n- user skill level and project context.\n\nRemember to reference the actual visual elements from screenshots whenever available.",
+          "tools": [
+            {
+              "name": "accessibilityTool",
+              "description": "Check accessibility issues.",
+              "type": "http",
+              "parameters": {
+                "url": "https://mockapi.io/accessibility",
+                "method": "POST"
+              }
+            },
+            {
+              "name": "colorContrastTool",
+              "description": "Analyze color contrast ratios for WCAG compliance.",
+              "type": "http",
+              "parameters": {
+                "url": "https://mockapi.io/contrast-check",
+                "method": "POST"
+              }
+            },
+            {
+              "name": "brandTool",
+              "description": "Check brand colors and visual consistency.",
+              "type": "http",
+              "parameters": {
+                "url": "https://mockapi.io/brand-check",
+                "method": "POST"
+              }
+            },
+            {
+              "name": "uxHeuristicsTool",
+              "description": "Evaluate usability heuristics and UX quality.",
+              "type": "http",
+              "parameters": {
+                "url": "https://mockapi.io/ux-heuristics",
+                "method": "POST"
+              }
+            },
+            {
+              "name": "webPerformanceTool",
+              "description": "Run Lighthouse performance audit.",
+              "type": "http",
+              "parameters": {
+                "url": "https://mockapi.io/lighthouse",
+                "method": "POST"
+              }
+            }
+          ]
+        },
+        "id": "crit-machine-agent",
+        "name": "Claude Crit Machine Agent",
+        "type": "@n8n/n8n-nodes-langchain.agentClaude",
+        "typeVersion": 1,
+        "position": [1400, 300],
+        "credentials": {
+          "anthropicApi": {
+            "id": "YOUR-CLAUDE-CREDENTIAL-ID",
+            "name": "Your Claude Credential"
+          }
+        }
+      }
+      ,
+      {
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "critique",
+                "value": "={{ $json.critique }}"
+              },
+              {
+                "name": "recommendations",
+                "value": "={{ JSON.stringify($json.recommendations) }}"
+              },
+              {
+                "name": "scores",
+                "value": "={{ JSON.stringify($json.scores) }}"
+              },
+              {
+                "name": "crit_sheet_markdown",
+                "value": "={{ $json.crit_sheet_markdown }}"
+              },
+              {
+                "name": "screenshots",
+                "value": "={{ JSON.stringify($json.screenshots) }}"
+              },
+              {
+                "name": "submission_id",
+                "value": "={{ $node[\"process-submission\"].json[\"submission_id\"] }}"
+              },
+              {
+                "name": "project_title",
+                "value": "={{ $node[\"process-submission\"].json[\"project_title\"] }}"
+              }
+            ]
+          }
+        },
+        "id": "format-response",
+        "name": "Format Crit Machine Response",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 2,
+        "position": [1600, 300]
+      },
+      {
+        "parameters": {
+          "operation": "insert",
+          "table": "crit_submissions",
+          "columns": "submission_id, project_title, critique, recommendations, scores, crit_sheet_markdown, screenshots, created_at",
+          "values": "={{ $json.submission_id }}, {{ $json.project_title }}, {{ $json.critique }}, {{ $json.recommendations }}, {{ $json.scores }}, {{ $json.crit_sheet_markdown }}, {{ $json.screenshots }}, {{ $now.toISOString() }}"
+        },
+        "id": "supabase-store",
+        "name": "Store Crit in Supabase",
+        "type": "@n8n/n8n-nodes-supabase.supabase",
+        "typeVersion": 1,
+        "position": [1800, 300],
+        "credentials": {
+          "supabaseApi": {
+            "id": "YOUR-SUPABASE-CREDENTIAL-ID",
+            "name": "Your Supabase Credential"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "statusCode": 200,
+          "responseData": "{\"success\": true, \"message\": \"Critique complete.\", \"submissionId\": \"{{ $json.submission_id }}\", \"critique\": {{ $json.critique }}, \"recommendations\": {{ $json.recommendations }}, \"scores\": {{ $json.scores }}, \"crit_sheet_markdown\": {{ $json.crit_sheet_markdown }}, \"screenshots\": {{ $json.screenshots }} }"
+        },
+        "id": "webhook-response",
+        "name": "Webhook Response",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [2000, 300]
+      }
+    ],
+    "connections": {
+      "Crit Submission Webhook": {
+        "main": [
+          [
+            {
+              "node": "Process Submission Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Process Submission Data": {
+        "main": [
+          [
+            {
+              "node": "Smart Submission Router",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Smart Submission Router": {
+        "main": [
+          [
+            {
+              "node": "Processing Path Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Processing Path Switch": {
+        "main": [
+          [
+            {
+              "node": "Enhanced File Processor",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Fetch URL HTML",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Enhanced File Processor",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      },
+      "Enhanced File Processor": {
+        "main": [
+          [
+            {
+              "node": "Claude Crit Machine Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch URL HTML": {
+        "main": [
+          [
+            {
+              "node": "Take Browserless Screenshot",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Take Browserless Screenshot": {
+        "main": [
+          [
+            {
+              "node": "Claude Crit Machine Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Claude Crit Machine Agent": {
+        "main": [
+          [
+            {
+              "node": "Format Crit Machine Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Crit Machine Response": {
+        "main": [
+          [
+            {
+              "node": "Store Crit in Supabase",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Store Crit in Supabase": {
+        "main": [
+          [
+            {
+              "node": "Webhook Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  }

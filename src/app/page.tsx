@@ -676,6 +676,12 @@ function Header({
               Examples
             </button>
             <button
+              onClick={() => window.location.href = '/resources'}
+              className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
+            >
+              Resources
+            </button>
+            <button
               onClick={() => {/* Future pricing section */}}
               className="text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200"
             >
@@ -731,6 +737,15 @@ function Header({
                   className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
                 >
                   Examples
+                </button>
+                <button
+                  onClick={() => {
+                    window.location.href = '/resources'
+                    setIsMenuOpen(false)
+                  }}
+                  className="text-left text-neutral-600 hover:text-neutral-900 font-ui font-medium transition-colors duration-200 py-2"
+                >
+                  Resources
                 </button>
                 <button
                   onClick={() => {/* Future pricing section */}}
@@ -1103,7 +1118,8 @@ export default function Home() {
     projectTitle: '',
     projectDescription: '',
     designLinks: '',
-    files: []
+    files: [],
+    designerSkillLevel: 'Beginner', // NEW FIELD
   })
   
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -1119,7 +1135,7 @@ export default function Home() {
 
   // File validation constants
   const MAX_FILES = 5
-  const MAX_SIZE_MB = 10
+  const MAX_SIZE_MB = 5
   const ALLOWED_TYPES = [
     'image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'application/pdf', 'application/octet-stream'
   ]
@@ -1145,7 +1161,8 @@ export default function Home() {
       projectTitle: '',
       projectDescription: '',
       designLinks: '',
-      files: []
+      files: [],
+      designerSkillLevel: 'Beginner', // NEW FIELD
     })
     setSubmitStatus('idle')
     setSubmitMessage('')
@@ -1251,6 +1268,7 @@ export default function Home() {
       
       // Append text fields
       formDataToSend.append('designerName', formData.designerName)
+      formDataToSend.append('designerSkillLevel', formData.designerSkillLevel) // NEW FIELD
       formDataToSend.append('email', formData.email)
       formDataToSend.append('projectTitle', formData.projectTitle)
       formDataToSend.append('projectDescription', formData.projectDescription)
@@ -1449,6 +1467,30 @@ export default function Home() {
                     />
                   </label>
 
+                  {/* Designer Skill Level - Compact Horizontal Radio Group */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <span className="font-ui font-medium text-neutral-700">Skill Level</span>
+                    <div className="flex flex-row gap-2 mt-1">
+                      {['Beginner', 'Intermediate', 'Advanced'].map((level) => (
+                        <label key={level} className={`px-3 py-1 rounded-full border font-ui text-sm cursor-pointer transition-colors duration-200
+                          ${formData.designerSkillLevel === level
+                            ? 'bg-primary-500 text-white border-primary-500'
+                            : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary-400'}
+                        `}>
+                          <input
+                            type="radio"
+                            name="designerSkillLevel"
+                            value={level}
+                            checked={formData.designerSkillLevel === level}
+                            onChange={e => setFormData(prev => ({ ...prev, designerSkillLevel: e.target.value }))}
+                            className="sr-only"
+                          />
+                          {level}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
                   <label className="block">
                     <span className="font-ui font-medium text-neutral-700 flex items-center gap-1">
                       Email *
@@ -1566,7 +1608,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </motion.svg>
                       <span className="font-ui font-medium">Drop your design here, or click to browse</span>
-                      <span className="text-sm">Images, PDFs, Figma exports (max 5 files, 10MB each)</span>
+                      <span className="text-sm">Images, PDFs, Figma exports (max 5 files, 5MB each)</span>
                     </div>
                   </motion.div>
 

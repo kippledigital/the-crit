@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "perplexity-mcp": {
+      "command": "npx",
+      "args": [
+        "-y", 
+        "@jschuller/perplexity-mcp"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "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"
+      }
+    },
+    "dataforseo-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "dataforseo-mcp-server"
+      ],
+      "env": {
+        "DATAFORSEO_LOGIN": "your_dataforseo_login",
+        "DATAFORSEO_PASSWORD": "your_dataforseo_password"
+      }
+    },
+    "the-crit-mcp": {
+      "command": "node",
+      "args": [
+        "./mcp-server/dist/index.js"
+      ]
+    }
+  }
+} 

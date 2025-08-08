@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.43",
+    "@jschuller/perplexity-mcp": "^2.0.1",
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.0",
     "lottie-react": "^2.4.1",

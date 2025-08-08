@@ -57,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
     console.log('Payload to webhook:', payload);
 
-    // POST to n8n webhook
+    // POST to N8N webhook
     const webhookUrl = process.env.N8N_WEBHOOK_URL;
     if (!webhookUrl) {
       res.status(500).json({ error: 'N8N_WEBHOOK_URL not set' });
@@ -65,22 +65,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      const n8nRes = await fetch(webhookUrl, {
+      const PIPEDREAMRes = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      console.log('Webhook response status:', n8nRes.status);
-      if (!n8nRes.ok) {
-        const text = await n8nRes.text();
+      console.log('Webhook response status:', PIPEDREAMRes.status);
+      if (!PIPEDREAMRes.ok) {
+        const text = await PIPEDREAMRes.text();
         console.error('Webhook error:', text);
-        res.status(500).json({ error: 'Failed to send to n8n', webhookStatus: n8nRes.status, webhookError: text });
+        res.status(500).json({ error: 'Failed to send to N8N', webhookStatus: PIPEDREAMRes.status, webhookError: text });
         return;
       }
       res.status(200).json({ success: true });
     } catch (error) {
       console.error('API error:', error);
-      res.status(500).json({ error: 'Failed to send to n8n' });
+      res.status(500).json({ error: 'Failed to send to N8N' });
     }
   });
 }

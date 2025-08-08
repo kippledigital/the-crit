@@ -5,6 +5,7 @@ export interface FormData {
   projectDescription: string
   designLinks: string
   files: File[]
+  designerSkillLevel: string
 }
 
 export interface ApiResponse {
